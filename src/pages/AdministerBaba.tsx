@@ -90,6 +90,7 @@ const AdministerBaba = () => {
             phone: phoneWithoutMask,
             player_type: registerPlayerType,
             is_mensalista: registerIsMensalista,
+            role: 'admin', // Definir a role como admin aqui
           }
         }
       });
@@ -113,7 +114,7 @@ const AdministerBaba = () => {
       // 3. Update the new user's profile to be admin of this new tenant
       const { error: profileUpdateError } = await supabase
         .from('profiles')
-        .update({ baba_id: newBabaId, role: 'admin' })
+        .update({ baba_id: newBabaId }) // A role já foi definida na criação
         .eq('id', newAdminUserId);
 
       if (profileUpdateError) throw profileUpdateError;
