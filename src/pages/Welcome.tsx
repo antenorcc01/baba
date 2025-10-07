@@ -3,12 +3,13 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { HomeIcon, UsersIcon, ShieldCheckIcon, PlusCircleIcon, LogInIcon } from "lucide-react";
+import { HomeIcon, UsersIcon, ShieldCheckIcon, PlusCircleIcon, LogInIcon, ArrowRight } from "lucide-react";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 
 const Welcome = () => {
   const { session, loading } = useAuth();
@@ -17,7 +18,6 @@ const Welcome = () => {
 
   useEffect(() => {
     if (!loading && session) {
-      // Se o usuário já estiver logado, redireciona para o dashboard
       navigate('/dashboard', { replace: true });
     }
   }, [session, loading, navigate]);
@@ -62,45 +62,37 @@ const Welcome = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full mb-10">
-          <Card className="flex flex-col items-center text-center p-6 border-primary">
-            <CardHeader>
-              <PlusCircleIcon className="h-12 w-12 text-primary mb-4" />
-              <CardTitle className="text-2xl">Administrar seu Baba</CardTitle>
-              <CardDescription>
-                Crie e gerencie seu próprio grupo de futebol.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow flex items-end">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg px-8 py-6">
+              Comece Agora <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-2xl text-center">Qual o seu próximo passo?</DialogTitle>
+              <DialogDescription className="text-center">
+                Crie um novo grupo de futebol ou junte-se a um que já existe.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col space-y-4 pt-4">
               <Button asChild size="lg" className="w-full">
                 <Link to="/administer-baba">
-                  <ShieldCheckIcon className="mr-2 h-5 w-5" />
-                  Começar a Administrar
+                  <PlusCircleIcon className="mr-2 h-5 w-5" />
+                  Criar um Novo Baba
                 </Link>
               </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="flex flex-col items-center text-center p-6 border-accent">
-            <CardHeader>
-              <UsersIcon className="h-12 w-12 text-accent mb-4" />
-              <CardTitle className="text-2xl">Entrar em um Baba Existente</CardTitle>
-              <CardDescription>
-                Junte-se a um grupo de futebol já criado.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow flex items-end">
-              <Button asChild size="lg" variant="outline" className="w-full border-accent text-accent hover:bg-accent/10">
+              <Button asChild size="lg" variant="outline" className="w-full">
                 <Link to="/join-baba">
                   <LogInIcon className="mr-2 h-5 w-5" />
-                  Entrar em um Baba
+                  Entrar em um Baba Existente
                 </Link>
               </Button>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
           <div className="bg-card p-6 rounded-lg shadow-sm border text-center">
             <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-primary-foreground font-bold text-xl">📅</span>

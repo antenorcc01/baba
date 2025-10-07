@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SearchIcon, ArrowLeftIcon, Loader2 } from "lucide-react";
+import { SearchIcon, ArrowLeftIcon, Loader2, LogInIcon, UserPlusIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { showSuccess, showError } from "@/utils/toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,11 +28,7 @@ const JoinBaba = () => {
 
   useEffect(() => {
     if (!authLoading && session && profile?.baba_id) {
-      // Se o usuário já está em um baba, redireciona para o dashboard
       navigate('/dashboard', { replace: true });
-    } else if (!authLoading && !session) {
-      // Se não está logado, redireciona para a página de autenticação
-      navigate('/auth', { replace: true });
     }
   }, [session, profile, authLoading, navigate]);
 
@@ -52,10 +48,8 @@ const JoinBaba = () => {
         setLoading(false);
       }
     };
-    if (session) { // Só busca tenants se o usuário estiver logado
-      fetchTenants();
-    }
-  }, [session]);
+    fetchTenants();
+  }, []);
 
   const handleJoinBaba = async () => {
     if (!selectedTenantId) {
@@ -64,7 +58,6 @@ const JoinBaba = () => {
     }
     if (!session?.user) {
       showError("Você precisa estar logado para entrar em um Baba.");
-      navigate('/auth');
       return;
     }
 
@@ -79,7 +72,7 @@ const JoinBaba = () => {
 
       const selectedTenantName = availableTenants.find(t => t.id === selectedTenantId)?.name;
       showSuccess(`Você entrou no Baba "${selectedTenantName}" com sucesso!`);
-      navigate('/dashboard', { replace: true }); // Redireciona para o dashboard
+      window.location.href = '/dashboard'; // Forçar recarregamento para garantir que o contexto seja atualizado
     } catch (error: any) {
       console.error("Erro ao entrar no Baba:", error);
       showError(error.message || "Erro ao entrar no Baba.");
@@ -98,10 +91,6 @@ const JoinBaba = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
-  }
-
-  if (!session) {
-    return null; // Redirecionamento já foi tratado no useEffect
   }
 
   return (
@@ -152,16 +141,26 @@ const JoinBaba = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={handleJoinBaba} className="w-full" disabled={isJoining || !selectedTenantId}>
-              {isJoining ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Entrando...
-                </>
-              ) : (
-                "Entrar no Baba"
-              )}
-            </Button>
+
+            {session && !profile?.baba_id ? (
+              <Button onClick={handleJoinBaba} className="w-full" disabled={isJoining || !selectedTenantId}>
+                {isJoining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Entrar no Baba
+              </Button>
+            ) : (
+              <div className="space-y-2 pt-4 border-t">
+                <Button asChild className="w-full" disabled={!selectedTenantId}>
+                  <Link to="/auth" state={{ baba_id: selectedTenantId, baba_name: availableTenants.find(t => t.id === selectedTenantId)?.name }}>
+                    <UserPlusIcon className="mr-2 h-4 w-4" /> Criar Conta para este Baba
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="w-full" disabled={!selectedTenantId}>
+                  <Link to="/auth" state={{ baba_id: selectedTenantId, baba_name: availableTenants.find(t => t.id === selectedTenantId)?.name }}>
+                    <LogInIcon className="mr-2 h-4 w-4" /> Já tenho conta
+                  </Link>
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

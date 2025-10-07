@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { ChromeIcon, ArrowLeftIcon } from "lucide-react"; // Importar o ícone do Google e ArrowLeft
+import { ChromeIcon, ArrowLeftIcon } from "lucide-react";
 
 const AuthPage = () => {
   const [loginEmail, setLoginEmail] = useState("");
@@ -23,43 +23,22 @@ const AuthPage = () => {
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerPhone, setRegisterPhone] = useState("");
-  const [registerPlayerType, setRegisterPlayerType] = useState("linha"); // Default to 'linha'
-  const [registerIsMensalista, setRegisterIsMensalista] = useState(true); // Default to true
+  const [registerPlayerType, setRegisterPlayerType] = useState("linha");
+  const [registerIsMensalista, setRegisterIsMensalista] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [babaName, setBabaName] = useState<string | null>(null); // Novo estado para o nome do Baba
 
   const { session, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { baba_id, baba_name } = location.state || {};
 
-  // Redirecionamento automático quando o usuário está logado E já tem um baba_id
   useEffect(() => {
     if (!authLoading && session && profile?.baba_id) {
       navigate('/dashboard', { replace: true });
     } else if (!authLoading && session && !profile?.baba_id) {
-      // Se logado mas sem baba_id, redireciona para a escolha de baba
       navigate('/join-baba', { replace: true });
     }
   }, [session, profile, authLoading, navigate]);
-
-  useEffect(() => {
-    const fetchBabaName = async () => {
-      const { data, error } = await supabase
-        .from('group_settings')
-        .select('setting_value')
-        .eq('setting_key', 'baba_name')
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error("Error fetching baba name in AuthPage:", error);
-        setBabaName(null);
-      } else if (data) {
-        setBabaName(data.setting_value);
-      } else {
-        setBabaName(null);
-      }
-    };
-    fetchBabaName();
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,12 +49,10 @@ const AuthPage = () => {
         password: loginPassword,
       });
       if (error) throw error;
-      
       showSuccess("Login realizado com sucesso!");
-      // O redirecionamento será tratado pelo useEffect
-      
     } catch (error: any) {
       showError(error.message || "Erro ao realizar login");
+    } finally {
       setLoading(false);
     }
   };
@@ -86,11 +63,13 @@ const AuthPage = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + '/join-baba', // Redireciona para a página de escolha de baba após o login
+          redirectTo: window.location.origin + '/join-baba',
+          queryParams: {
+            baba_id: baba_id || '',
+          },
         },
       });
       if (error) throw error;
-      // No need for showSuccess here, onAuthStateChange will handle it
     } catch (error: any) {
       showError(error.message || "Erro ao fazer login com Google.");
       setLoading(false);
@@ -113,6 +92,7 @@ const AuthPage = () => {
             phone: phoneWithoutMask,
             player_type: registerPlayerType,
             is_mensalista: registerIsMensalista,
+            baba_id: baba_id, // Inclui o ID do Baba nos metadados
           }
         }
       });
@@ -153,7 +133,6 @@ const AuthPage = () => {
     setRegisterPhone(formattedValue);
   };
 
-  // Mostrar loading enquanto verifica autenticação
   if (authLoading) {
     return (
       <div className="flex-grow flex items-center justify-center">
@@ -162,16 +141,12 @@ const AuthPage = () => {
     );
   }
 
-  // Se já está logado e sem baba_id, o useEffect já redirecionou para /join-baba
-  // Se já está logado e com baba_id, o useEffect já redirecionou para /dashboard
-  // Então, se chegamos aqui, o usuário não está logado.
-
   return (
     <div className="flex-grow flex flex-col bg-background">
       <main className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center">
         <div className="w-full max-w-md">
           <Button asChild variant="ghost" className="mb-6 self-start">
-            <Link to="/welcome" className="flex items-center gap-2 text-sm">
+            <Link to={baba_id ? "/join-baba" : "/welcome"} className="flex items-center gap-2 text-sm">
               <ArrowLeftIcon className="h-4 w-4" />
               Voltar
             </Link>
@@ -198,7 +173,7 @@ const AuthPage = () => {
                 <CardHeader>
                   <CardTitle className="text-primary">Acesse sua conta</CardTitle>
                   <CardDescription>
-                    Entre com seu e-mail e senha para acessar o {babaName || "sistema"}
+                    {baba_name ? `Entre para acessar o Baba "${baba_name}"` : "Entre com seu e-mail e senha"}
                   </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleLogin}>
@@ -263,7 +238,7 @@ const AuthPage = () => {
                 <CardHeader>
                   <CardTitle className="text-primary">Crie sua conta</CardTitle>
                   <CardDescription>
-                    Cadastre-se para participar dos babas
+                    {baba_name ? `Cadastre-se para entrar no Baba "${baba_name}"` : "Cadastre-se para participar dos babas"}
                   </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleRegister}>
