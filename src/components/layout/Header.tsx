@@ -60,7 +60,8 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const [whatsappLink, setWhatsappLink] = useState<string | null>(null);
-  const [babaName, setBabaName] = useState<string | null>(null); // Novo estado para o nome do Baba
+  const [babaName, setBabaName] = useState<string | null>(null);
+  const [babaLogoUrl, setBabaLogoUrl] = useState<string>("/favicon.png");
 
   const isAuthPage = location.pathname === '/auth';
   const isWelcomePage = location.pathname === '/';
@@ -72,25 +73,31 @@ export default function Header() {
 
   useEffect(() => {
     const fetchSettings = async () => {
+      if (!profile?.baba_id) return;
+
       const { data, error } = await supabase
         .from('group_settings')
         .select('setting_key, setting_value')
-        .in('setting_key', ['whatsapp_group_link', 'baba_name']); // Buscar também o nome do Baba
+        .in('setting_key', ['whatsapp_group_link', 'baba_name', 'baba_logo_url'])
+        .eq('baba_id', profile.baba_id);
 
       if (error && error.code !== 'PGRST116') {
         console.error("Error fetching settings in Header:", error);
         setWhatsappLink(null);
         setBabaName(null);
+        setBabaLogoUrl("/favicon.png");
       } else if (data) {
         const settingsMap = data.reduce((acc, setting) => {
           acc[setting.setting_key] = setting.setting_value;
           return acc;
         }, {} as Record<string, string>);
         setWhatsappLink(settingsMap['whatsapp_group_link'] || null);
-        setBabaName(settingsMap['baba_name'] || null); // Definir o nome do Baba
+        setBabaName(settingsMap['baba_name'] || null);
+        setBabaLogoUrl(settingsMap['baba_logo_url'] || "/favicon.png");
       } else {
         setWhatsappLink(null);
         setBabaName(null);
+        setBabaLogoUrl("/favicon.png");
       }
     };
 
@@ -99,10 +106,10 @@ export default function Header() {
     } else {
       setWhatsappLink(null);
       setBabaName(null);
+      setBabaLogoUrl("/favicon.png");
     }
-  }, [showNavAndProfile]);
+  }, [showNavAndProfile, profile?.baba_id]);
 
-  // Efeito para atualizar o título da aba do navegador
   useEffect(() => {
     document.title = babaName ? `${babaName} - Baba App` : 'Baba App';
   }, [babaName]);
@@ -153,7 +160,7 @@ export default function Header() {
     <header className="bg-primary shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 h-28 flex items-center justify-between">
         <Link to={session && profile?.baba_id ? "/dashboard" : "/"} className="flex items-center gap-2">
-          <img src="/favicon.png" alt="Logo" className="h-24 w-24" />
+          <img src={babaLogoUrl} alt="Logo" className="h-24 w-24 object-contain" />
           <span className="text-2xl font-bold text-primary-foreground">{babaName || "Baba dos Baianos"}</span>
         </Link>
 
@@ -224,7 +231,7 @@ export default function Header() {
                   <SheetContent side="right" className="w-[280px] p-4 flex flex-col">
                     <div className="mb-6">
                       <Link to="/" className="flex items-center gap-2">
-                        <img src="/favicon.png" alt="Logo" className="h-8 w-8" />
+                        <img src={babaLogoUrl} alt="Logo" className="h-8 w-8 object-contain" />
                         <span className="text-lg font-bold">{babaName || "Baba dos Baianos"}</span>
                       </Link>
                     </div>
