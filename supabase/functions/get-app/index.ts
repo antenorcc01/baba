@@ -13,12 +13,12 @@ serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { data: profiles, error: profilesError } = await supabase
+    const { data: profiles, error: profilesError } = await supabaseAdmin
       .from('profiles')
       .select('*')
       .eq('is_deleted', false)
@@ -26,7 +26,7 @@ serve(async (req) => {
 
     if (profilesError) throw profilesError
 
-    const { data: guests, error: guestsError } = await supabase
+    const { data: guests, error: guestsError } = await supabaseAdmin
       .from('guest_players')
       .select('*, invited_by_profile:profiles(full_name)')
       .eq('is_deleted', false)

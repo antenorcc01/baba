@@ -44,12 +44,25 @@ const AuthPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: loginEmail,
         password: loginPassword,
       });
-      if (error) throw error;
-      showSuccess("Login realizado com sucesso!");
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("Login falhou, usuário não encontrado.");
+
+      if (baba_id) {
+        const { error: profileUpdateError } = await supabase
+          .from('profiles')
+          .update({ baba_id: baba_id })
+          .eq('id', authData.user.id);
+
+        if (profileUpdateError) throw profileUpdateError;
+        
+        showSuccess(`Você entrou no Baba "${baba_name}" com sucesso!`);
+      } else {
+        showSuccess("Login realizado com sucesso!");
+      }
     } catch (error: any) {
       showError(error.message || "Erro ao realizar login");
     } finally {
