@@ -216,7 +216,7 @@ export default function Header() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <div className="py-1 text-center text-xs text-muted-foreground">
-                        v1.07
+                        v1.00
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -272,7 +272,7 @@ export default function Header() {
                         </SheetClose>
                       </div>
                       <div className="pt-4 text-center text-xs text-muted-foreground">
-                        v1.07
+                        v1.00
                       </div>
                     </div>
                   </SheetContent>
