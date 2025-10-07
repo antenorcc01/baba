@@ -102,6 +102,11 @@ export default function Header() {
     }
   }, [showNavAndProfile]);
 
+  // Efeito para atualizar o título da aba do navegador
+  useEffect(() => {
+    document.title = babaName ? `${babaName} - Baba App` : 'Baba App';
+  }, [babaName]);
+
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -204,7 +209,7 @@ export default function Header() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <div className="py-1 text-center text-xs text-muted-foreground">
-                    v1.07
+                        v1.07
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
