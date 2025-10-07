@@ -91,7 +91,7 @@ export default function TournamentTeamGenerator({
   existingTeams,
   onTeamsGenerated,
 }: TournamentTeamGeneratorProps) {
-  const { isAdmin } = useAuth();
+  const { isAdmin, profile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [generatedTeams, setGeneratedTeams] = useState<TournamentTeam[]>(existingTeams || []);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -176,6 +176,7 @@ export default function TournamentTeamGenerator({
           tournament_id: tournament.id,
           name: team.name,
           group_name: team.group_name,
+          baba_id: profile?.baba_id,
         })))
         .select();
 
@@ -226,6 +227,7 @@ export default function TournamentTeamGenerator({
                 team1_id: team1.id,
                 team2_id: team2.id,
                 status: 'scheduled',
+                baba_id: profile?.baba_id,
             });
         }
       } else if (tournament.type === 'campeonato' && tournament.num_groups && tournament.num_groups > 0) {
@@ -251,6 +253,7 @@ export default function TournamentTeamGenerator({
                           team1_id: groupTeams[i].id,
                           team2_id: groupTeams[j].id,
                           status: 'scheduled',
+                          baba_id: profile?.baba_id,
                       });
                   }
               }

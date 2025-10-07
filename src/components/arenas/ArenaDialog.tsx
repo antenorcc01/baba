@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { UploadIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { showSuccess, showError } from "@/utils/toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const arenaSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -44,6 +45,7 @@ const ArenaDialog = ({ isOpen, onOpenChange, arena, onSuccess }: ArenaDialogProp
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { profile } = useAuth();
 
   const form = useForm<ArenaFormData>({
     resolver: zodResolver(arenaSchema),
@@ -123,6 +125,7 @@ const ArenaDialog = ({ isOpen, onOpenChange, arena, onSuccess }: ArenaDialogProp
             price: priceValue,
             image_url: imageUrl,
             updated_at: new Date().toISOString(),
+            baba_id: profile?.baba_id,
           })
           .eq('id', arena.id);
 
@@ -137,6 +140,7 @@ const ArenaDialog = ({ isOpen, onOpenChange, arena, onSuccess }: ArenaDialogProp
             address: data.address,
             price: priceValue,
             image_url: imageUrl,
+            baba_id: profile?.baba_id,
           });
 
         if (error) throw error;

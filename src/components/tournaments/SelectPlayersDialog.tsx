@@ -10,6 +10,7 @@ import { SearchIcon, StarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { showError, showSuccess } from "@/utils/toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface TournamentPlayer {
   id: string; // UUID for profile, number for guest
@@ -49,6 +50,7 @@ const renderSkillStars = (level: number | undefined) => {
 };
 
 const SelectPlayersDialog = ({ isOpen, onOpenChange, onPlayersSelected, initialSelectedPlayers, tournamentId, maxPlayersAllowed }: SelectPlayersDialogProps) => {
+  const { profile } = useAuth();
   const [allAvailablePlayers, setAllAvailablePlayers] = useState<TournamentPlayer[]>([]);
   const [selectedPlayers, setSelectedPlayers] = useState<TournamentPlayer[]>(initialSelectedPlayers);
   const [loading, setLoading] = useState(true);
@@ -147,7 +149,7 @@ const SelectPlayersDialog = ({ isOpen, onOpenChange, onPlayersSelected, initialS
         if (reg.guest_player_id) currentRegisteredMap.set(`guest-${reg.guest_player_id}`, reg.id);
       });
 
-      const toInsert: { tournament_id: string; player_id?: string; guest_player_id?: number }[] = [];
+      const toInsert: { tournament_id: string; player_id?: string; guest_player_id?: number; baba_id: string | null }[] = [];
       const toDeleteIds: string[] = [];
 
       // Determine insertions
@@ -158,6 +160,7 @@ const SelectPlayersDialog = ({ isOpen, onOpenChange, onPlayersSelected, initialS
             tournament_id: tournamentId,
             player_id: player.type === 'profile' ? player.id : undefined,
             guest_player_id: player.type === 'guest' ? parseInt(player.id) : undefined,
+            baba_id: profile?.baba_id || null,
           });
         }
       });

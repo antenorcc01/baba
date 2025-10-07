@@ -18,7 +18,7 @@ import { ptBR } from "date-fns/locale";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const TorneiosPage = () => {
-  const { isAdmin, user, loading: authLoading } = useAuth();
+  const { isAdmin, user, loading: authLoading, profile } = useAuth();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -99,6 +99,7 @@ const TorneiosPage = () => {
         has_enrollment_fee: data.hasEnrollmentFee,
         enrollment_fee_amount: data.hasEnrollmentFee && data.enrollmentFeeAmount ? parseFloat(data.enrollmentFeeAmount) : 0,
         pix_info: data.hasEnrollmentFee ? data.pixInfo || null : null,
+        baba_id: profile?.baba_id,
       };
 
       if (editingTournament) {

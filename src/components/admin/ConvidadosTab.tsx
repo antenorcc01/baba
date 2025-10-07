@@ -80,12 +80,13 @@ export default function ConvidadosTab() {
     setIsSubmitting(true);
     try {
       const phoneWithoutMask = data.phone?.replace(/\D/g, "") || null;
-      const submissionData = {
+      const submissionData: any = {
         full_name: data.full_name,
         phone: phoneWithoutMask,
         player_type: data.player_type || null,
         invited_by: data.invited_by || null,
-        skill_level: data.skill_level, // Usando data.skill_level diretamente
+        skill_level: data.skill_level,
+        baba_id: profile?.baba_id,
       };
       if (!isAdmin && user) {
         submissionData.invited_by = user.id;

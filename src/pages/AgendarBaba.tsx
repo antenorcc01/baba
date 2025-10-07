@@ -6,10 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import GameForm, { GameFormData } from "@/components/games/GameForm";
 import { supabase } from "@/integrations/supabase/client";
 import { showSuccess, showError } from "@/utils/toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AgendarBaba = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { profile } = useAuth();
 
   const handleFormSubmit = async (data: GameFormData) => {
     setIsSubmitting(true);
@@ -24,6 +26,7 @@ const AgendarBaba = () => {
         status: 'Agendado',
         default_match_duration_minutes: parseInt(data.defaultMatchDurationMinutes, 10),
         default_match_win_goals: parseInt(data.defaultMatchWinGoals, 10),
+        baba_id: profile?.baba_id,
       };
 
       const { error } = await supabase

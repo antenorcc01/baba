@@ -36,7 +36,7 @@ export default function FinanceiroTab() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { isAdmin, loading: authLoading } = useAuth();
+  const { isAdmin, loading: authLoading, profile } = useAuth();
 
   const fetchPayments = async () => {
     if (!isAdmin) return;
@@ -82,6 +82,7 @@ export default function FinanceiroTab() {
         payment_date: correctedDate.toISOString(),
         player_id: null,
         guest_player_id: null,
+        baba_id: profile?.baba_id,
       };
 
       if (data.type === 'Entrada' && data.playerId) {
