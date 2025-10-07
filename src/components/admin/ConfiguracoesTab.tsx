@@ -84,14 +84,26 @@ const ConfiguracoesTab = () => {
       return;
     }
     try {
-      const { error } = await supabase
+      // Update group_settings
+      const { error: settingsError } = await supabase
         .from('group_settings')
         .upsert(
           { setting_key: key, setting_value: value, baba_id: profile.baba_id },
           { onConflict: 'setting_key,baba_id' }
         );
       
-      if (error) throw error;
+      if (settingsError) throw settingsError;
+
+      // If the key is 'baba_name', also update the 'tenants' table.
+      if (key === 'baba_name') {
+        const { error: tenantUpdateError } = await supabase
+          .from('tenants')
+          .update({ name: value })
+          .eq('id', profile.baba_id);
+        
+        if (tenantUpdateError) throw tenantUpdateError;
+      }
+
       dbSetter(value);
       showSuccess("Configuração atualizada com sucesso!");
 
