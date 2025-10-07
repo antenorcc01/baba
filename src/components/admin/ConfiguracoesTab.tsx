@@ -12,8 +12,10 @@ import AdminLixeira from "@/components/admin/AdminLixeira";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import SendMessageForm from "@/components/admin/SendMessageForm"; // Importar o novo componente
+import { useAuth } from "@/contexts/AuthContext"; // Importar useAuth
 
 const ConfiguracoesTab = () => {
+  const { profile } = useAuth(); // Obter o perfil do usuário autenticado
   const [dueDate, setDueDate] = useState("10");
   const [monthlyFee, setMonthlyFee] = useState("50");
   const [dailyFee, setDailyFee] = useState("20");
@@ -30,10 +32,13 @@ const ConfiguracoesTab = () => {
 
   useEffect(() => {
     const fetchSettings = async () => {
+      if (!profile?.baba_id) return; // Só busca se o baba_id estiver disponível
+
       try {
         const { data: settingsData, error: settingsError } = await supabase
           .from('group_settings')
-          .select('setting_key, setting_value');
+          .select('setting_key, setting_value')
+          .eq('baba_id', profile.baba_id); // Filtrar por baba_id
         if (settingsError) console.warn("Could not fetch settings. Using defaults.");
 
         const settings = settingsData?.reduce((acc, setting) => {
@@ -62,14 +67,23 @@ const ConfiguracoesTab = () => {
         showError(error.message || "Erro ao carregar configurações.");
       }
     };
-    fetchSettings();
-  }, []);
+    if (profile?.baba_id) {
+      fetchSettings();
+    }
+  }, [profile?.baba_id]); // Depende do baba_id do perfil
 
   const handleSettingSave = async (key: string, value: string, dbSetter: (val: string) => void) => {
+    if (!profile?.baba_id) {
+      showError("ID do Baba não encontrado. Não é possível salvar configurações.");
+      return;
+    }
     try {
       const { error } = await supabase
         .from('group_settings')
-        .upsert({ setting_key: key, setting_value: value }, { onConflict: 'setting_key' });
+        .upsert(
+          { setting_key: key, setting_value: value, baba_id: profile.baba_id },
+          { onConflict: 'setting_key, baba_id' } // Usar chave primária composta
+        );
       
       if (error) throw error;
       dbSetter(value);

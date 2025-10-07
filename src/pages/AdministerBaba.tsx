@@ -118,12 +118,16 @@ const AdministerBaba = () => {
 
       if (profileUpdateError) throw profileUpdateError;
 
-      // 4. Save the baba name in group_settings for the new tenant
-      const { error: settingsError } = await supabase
-        .from('group_settings')
-        .insert({ baba_id: newBabaId, setting_key: 'baba_name', setting_value: babaName });
+      // 4. Save the baba name in group_settings for the new tenant using Edge Function
+      const { error: settingsInvokeError } = await supabase.functions.invoke('create-group-setting', {
+        body: {
+          baba_id: newBabaId,
+          setting_key: 'baba_name',
+          setting_value: babaName,
+        },
+      });
       
-      if (settingsError) console.error("Error saving baba name to group_settings:", settingsError);
+      if (settingsInvokeError) console.error("Error invoking create-group-setting Edge Function:", settingsInvokeError);
 
 
       showSuccess(`Baba "${babaName}" criado com sucesso! Você é o administrador.`);
