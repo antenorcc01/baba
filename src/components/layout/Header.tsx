@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { LogOutIcon, MenuIcon, UserIcon, Shield, Users, DollarSign, ScrollText, Calendar, MapPinIcon, Home, TrophyIcon, MessageCircle } from "lucide-react";
+import { LogOutIcon, MenuIcon, UserIcon, Shield, Users, DollarSign, ScrollText, Calendar, MapPinIcon, Home, TrophyIcon, MessageCircle, LogInIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { showSuccess } from "@/utils/toast";
@@ -56,9 +56,18 @@ function MobileNavLink({ to, children, Icon }: { to: string; children: React.Rea
   }
 
 export default function Header() {
-  const { session, profile, isAdmin } = useAuth();
+  const { session, profile, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [whatsappLink, setWhatsappLink] = useState<string | null>(null);
+
+  const isAuthPage = location.pathname === '/auth';
+  const isWelcomePage = location.pathname === '/';
+  const isAdministerBabaPage = location.pathname === '/administer-baba';
+  const isJoinBabaPage = location.pathname === '/join-baba';
+
+  const showAuthButtons = !session && (isWelcomePage || isAuthPage || isAdministerBabaPage || isJoinBabaPage);
+  const showNavAndProfile = session && !authLoading && profile?.baba_id;
 
   useEffect(() => {
     const fetchWhatsappLink = async () => {
@@ -73,17 +82,17 @@ export default function Header() {
         setWhatsappLink(null);
       } else if (data) {
         setWhatsappLink(data.setting_value);
-        console.log("WhatsApp Link fetched in Header:", data.setting_value);
       } else {
         setWhatsappLink(null);
-        console.log("WhatsApp Link not found in Header.");
       }
     };
 
-    fetchWhatsappLink();
-  }, []);
-
-  console.log("Current whatsappLink in Header:", whatsappLink); // Linha adicionada para depuração
+    if (showNavAndProfile) { // Só busca o link do WhatsApp se o usuário estiver logado e em um baba
+      fetchWhatsappLink();
+    } else {
+      setWhatsappLink(null); // Limpa o link se não estiver logado ou em um baba
+    }
+  }, [showNavAndProfile]);
 
   const handleSignOut = async () => {
     try {
@@ -91,7 +100,7 @@ export default function Header() {
       if (error) throw error;
       
       showSuccess("Logout realizado com sucesso!");
-      navigate('/', { replace: true });
+      navigate('/', { replace: true }); // Redireciona para a nova página de boas-vindas
       
     } catch (error: any) {
       console.error('Erro ao fazer logout:', error);
@@ -130,12 +139,12 @@ export default function Header() {
   return (
     <header className="bg-primary shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 h-28 flex items-center justify-between">
-        <Link to={session ? "/dashboard" : "/"} className="flex items-center gap-2">
+        <Link to={session && profile?.baba_id ? "/dashboard" : "/"} className="flex items-center gap-2">
           <img src="/favicon.png" alt="Logo" className="h-24 w-24" />
           <span className="text-2xl font-bold text-primary-foreground">Baba dos Baianos</span>
         </Link>
 
-        {session && (
+        {showNavAndProfile && (
           <nav className="hidden md:flex items-center gap-6">
             {navItems.map((item) => (
               <NavLink key={item.path} to={item.path}>
@@ -147,7 +156,7 @@ export default function Header() {
 
         <div className="flex items-center gap-2">
           <ModeToggle />
-          {session ? (
+          {showNavAndProfile ? (
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -250,6 +259,13 @@ export default function Header() {
                 </Sheet>
               </div>
             </>
+          ) : showAuthButtons ? (
+            <Button asChild variant="secondary" className="text-primary">
+              <Link to="/auth">
+                <LogInIcon className="mr-2 h-4 w-4" />
+                Entrar
+              </Link>
+            </Button>
           ) : null }
         </div>
       </div>

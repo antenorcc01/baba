@@ -3,7 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import Welcome from "./pages/Welcome"; // Nova página de boas-vindas
+import AuthPage from "./pages/AuthPage"; // Página de autenticação renomeada
+import AdministerBaba from "./pages/AdministerBaba"; // Nova página para administrar baba
+import JoinBaba from "./pages/JoinBaba"; // Nova página para entrar em um baba
 import Babas from "./pages/Babas";
 import Arenas from "./pages/Arenas";
 import Jogadores from "./pages/Jogadores";
@@ -19,8 +22,8 @@ import Perfil from "./pages/Perfil";
 import BabaDetail from "./pages/BabaDetail";
 import AgendarBaba from "./pages/AgendarBaba";
 import Dashboard from "./pages/Dashboard";
-import TorneiosPage from "./pages/Torneios"; // Importar a nova página de Torneios
-import TournamentDetailPage from "./pages/TournamentDetail"; // Importar a página de detalhes do Torneio
+import TorneiosPage from "./pages/Torneios";
+import TournamentDetailPage from "./pages/TournamentDetail";
 
 const queryClient = new QueryClient();
 
@@ -32,7 +35,7 @@ const App = () => {
           attribute="class" 
           defaultTheme="system" 
           storageKey="vite-ui-theme"
-          themes={['light', 'dark', 'system', 'bbmp', 'leao']} // Adicionado os novos temas aqui
+          themes={['light', 'dark', 'system', 'bbmp', 'leao']}
         >
           <AuthProvider>
             <Toaster />
@@ -42,7 +45,11 @@ const App = () => {
                 <Header />
                 <main className="flex-grow flex flex-col">
                   <Routes>
-                    <Route path="/" element={<Index />} />
+                    <Route path="/" element={<Welcome />} /> {/* Nova rota inicial */}
+                    <Route path="/auth" element={<AuthPage />} /> {/* Rota para login/cadastro */}
+                    <Route path="/administer-baba" element={<AdministerBaba />} /> {/* Rota para administrar baba */}
+                    <Route path="/join-baba" element={<JoinBaba />} /> {/* Rota para entrar em um baba */}
+                    
                     <Route element={<ProtectedRoute />}>
                       <Route path="/dashboard" element={<Dashboard />} />
                       <Route path="/administracao" element={<Administracao />} />
@@ -54,8 +61,8 @@ const App = () => {
                       <Route path="/meus-pagamentos" element={<MeusPagamentos />} />
                       <Route path="/regulamento" element={<Regulamento />} />
                       <Route path="/perfil" element={<Perfil />} />
-                      <Route path="/torneios" element={<TorneiosPage />} /> {/* Nova rota */}
-                      <Route path="/torneios/:id" element={<TournamentDetailPage />} /> {/* Nova rota de detalhes */}
+                      <Route path="/torneios" element={<TorneiosPage />} />
+                      <Route path="/torneios/:id" element={<TournamentDetailPage />} />
                     </Route>
                     <Route path="*" element={<NotFound />} />
                   </Routes>

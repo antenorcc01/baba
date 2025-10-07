@@ -14,9 +14,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { ChromeIcon } from "lucide-react"; // Importar o ícone do Google
+import { ChromeIcon, ArrowLeftIcon } from "lucide-react"; // Importar o ícone do Google e ArrowLeft
 
-const Index = () => {
+const AuthPage = () => {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [registerName, setRegisterName] = useState("");
@@ -27,16 +27,18 @@ const Index = () => {
   const [registerIsMensalista, setRegisterIsMensalista] = useState(true); // Default to true
   const [loading, setLoading] = useState(false);
 
-  const { session, isAdmin, loading: authLoading } = useAuth();
+  const { session, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirecionamento automático quando o usuário está logado
+  // Redirecionamento automático quando o usuário está logado E já tem um baba_id
   useEffect(() => {
-    if (!authLoading && session) {
-      // Administradores e usuários comuns agora são redirecionados para o Dashboard
+    if (!authLoading && session && profile?.baba_id) {
       navigate('/dashboard', { replace: true });
+    } else if (!authLoading && session && !profile?.baba_id) {
+      // Se logado mas sem baba_id, redireciona para a escolha de baba
+      navigate('/join-baba', { replace: true });
     }
-  }, [session, isAdmin, authLoading, navigate]);
+  }, [session, profile, authLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,9 +51,7 @@ const Index = () => {
       if (error) throw error;
       
       showSuccess("Login realizado com sucesso!");
-      
-      // Removido: Atualizar a página após login bem-sucedido
-      // O AuthContext e o useEffect acima já cuidam do redirecionamento.
+      // O redirecionamento será tratado pelo useEffect
       
     } catch (error: any) {
       showError(error.message || "Erro ao realizar login");
@@ -65,7 +65,7 @@ const Index = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin, // Redireciona de volta para a URL atual após o login
+          redirectTo: window.location.origin + '/join-baba', // Redireciona para a página de escolha de baba após o login
         },
       });
       if (error) throw error;
@@ -141,28 +141,21 @@ const Index = () => {
     );
   }
 
-  // Se já está logado, não mostrar a tela de login (o redirecionamento acontecerá)
-  if (session) {
-    return (
-      <div className="flex-grow flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  // Se já está logado e sem baba_id, o useEffect já redirecionou para /join-baba
+  // Se já está logado e com baba_id, o useEffect já redirecionou para /dashboard
+  // Então, se chegamos aqui, o usuário não está logado.
 
   return (
     <div className="flex-grow flex flex-col bg-background">
       <main className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Organize seus jogos de futebol com facilidade
-          </h2>
-          <p className="text-lg text-foreground max-w-2xl mx-auto">
-            Agende babas, confirme presença, sorteie times e controle pagamentos. Tudo em um só lugar!
-          </p>
-        </div>
+        <div className="w-full max-w-md">
+          <Button asChild variant="ghost" className="mb-6 self-start">
+            <Link to="/welcome" className="flex items-center gap-2 text-sm">
+              <ArrowLeftIcon className="h-4 w-4" />
+              Voltar
+            </Link>
+          </Button>
 
-        <div className="w-full max-w-md mb-10">
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-card">
               <TabsTrigger 
@@ -355,32 +348,6 @@ const Index = () => {
             </TabsContent>
           </Tabs>
         </div>
-
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
-          <div className="bg-card p-6 rounded-lg shadow-sm border text-center">
-            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-primary-foreground font-bold text-xl">📅</span>
-            </div>
-            <h3 className="font-bold text-lg mb-2">Agende Babas</h3>
-            <p className="text-muted-foreground">Organize jogos semanais com facilidade</p>
-          </div>
-          
-          <div className="bg-card p-6 rounded-lg shadow-sm border text-center">
-            <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-accent-foreground font-bold text-xl">👥</span>
-            </div>
-            <h3 className="font-bold text-lg mb-2">Sorteie Times</h3>
-            <p className="text-muted-foreground">Crie times equilibrados automaticamente</p>
-          </div>
-          
-          <div className="bg-card p-6 rounded-lg shadow-sm border text-center">
-            <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-bold text-xl">💰</span>
-            </div>
-            <h3 className="font-bold text-lg mb-2">Controle Financeiro</h3>
-            <p className="text-muted-foreground">Gerencie pagamentos e mensalidades</p>
-          </div>
-        </div>
       </main>
 
       <MadeWithDyad />
@@ -388,4 +355,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default AuthPage;
