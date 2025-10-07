@@ -6,12 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { HomeIcon, UsersIcon, ShieldCheckIcon, PlusCircleIcon, LogInIcon } from "lucide-react";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const Welcome = () => {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
+  const [babaName, setBabaName] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && session) {
@@ -19,6 +21,26 @@ const Welcome = () => {
       navigate('/dashboard', { replace: true });
     }
   }, [session, loading, navigate]);
+
+  useEffect(() => {
+    const fetchBabaName = async () => {
+      const { data, error } = await supabase
+        .from('group_settings')
+        .select('setting_value')
+        .eq('setting_key', 'baba_name')
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error("Error fetching baba name in Welcome:", error);
+        setBabaName(null);
+      } else if (data) {
+        setBabaName(data.setting_value);
+      } else {
+        setBabaName(null);
+      }
+    };
+    fetchBabaName();
+  }, []);
 
   if (loading) {
     return (
@@ -33,7 +55,7 @@ const Welcome = () => {
       <main className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center justify-center text-center">
         <div className="mb-10">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Bem-vindo ao Baba dos Baianos!
+            Bem-vindo ao {babaName || "Baba dos Baianos"}!
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             Organize seus jogos de futebol com facilidade, gerencie jogadores, sorteie times e controle pagamentos. Tudo em um só lugar!

@@ -26,6 +26,7 @@ const AuthPage = () => {
   const [registerPlayerType, setRegisterPlayerType] = useState("linha"); // Default to 'linha'
   const [registerIsMensalista, setRegisterIsMensalista] = useState(true); // Default to true
   const [loading, setLoading] = useState(false);
+  const [babaName, setBabaName] = useState<string | null>(null); // Novo estado para o nome do Baba
 
   const { session, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -39,6 +40,26 @@ const AuthPage = () => {
       navigate('/join-baba', { replace: true });
     }
   }, [session, profile, authLoading, navigate]);
+
+  useEffect(() => {
+    const fetchBabaName = async () => {
+      const { data, error } = await supabase
+        .from('group_settings')
+        .select('setting_value')
+        .eq('setting_key', 'baba_name')
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error("Error fetching baba name in AuthPage:", error);
+        setBabaName(null);
+      } else if (data) {
+        setBabaName(data.setting_value);
+      } else {
+        setBabaName(null);
+      }
+    };
+    fetchBabaName();
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,7 +198,7 @@ const AuthPage = () => {
                 <CardHeader>
                   <CardTitle className="text-primary">Acesse sua conta</CardTitle>
                   <CardDescription>
-                    Entre com seu e-mail e senha para acessar o sistema
+                    Entre com seu e-mail e senha para acessar o {babaName || "sistema"}
                   </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleLogin}>

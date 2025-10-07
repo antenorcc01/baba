@@ -23,6 +23,7 @@ const AdministerBaba = () => {
   const [registerPlayerType, setRegisterPlayerType] = useState("linha"); // Default to 'linha'
   const [registerIsMensalista, setRegisterIsMensalista] = useState(true); // Default to true
   const [loading, setLoading] = useState(false);
+  const [currentBabaName, setCurrentBabaName] = useState<string | null>(null); // Para exibir o nome do baba existente
   const { session, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -32,6 +33,26 @@ const AdministerBaba = () => {
       navigate('/dashboard', { replace: true });
     }
   }, [session, profile, authLoading, navigate]);
+
+  useEffect(() => {
+    const fetchCurrentBabaName = async () => {
+      const { data, error } = await supabase
+        .from('group_settings')
+        .select('setting_value')
+        .eq('setting_key', 'baba_name')
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error("Error fetching baba name in AdministerBaba:", error);
+        setCurrentBabaName(null);
+      } else if (data) {
+        setCurrentBabaName(data.setting_value);
+      } else {
+        setCurrentBabaName(null);
+      }
+    };
+    fetchCurrentBabaName();
+  }, []);
 
   const formatPhoneNumber = (value: string) => {
     const cleaned = value.replace(/\D/g, '');
@@ -96,6 +117,14 @@ const AdministerBaba = () => {
         .eq('id', newAdminUserId);
 
       if (profileUpdateError) throw profileUpdateError;
+
+      // 4. Save the baba name in group_settings for the new tenant
+      const { error: settingsError } = await supabase
+        .from('group_settings')
+        .insert({ baba_id: newBabaId, setting_key: 'baba_name', setting_value: babaName });
+      
+      if (settingsError) console.error("Error saving baba name to group_settings:", settingsError);
+
 
       showSuccess(`Baba "${babaName}" criado com sucesso! Você é o administrador.`);
       navigate('/dashboard', { replace: true }); // Redireciona para o dashboard
@@ -252,7 +281,7 @@ const AdministerBaba = () => {
             <LogInIcon className="h-12 w-12 text-accent mx-auto mb-4" />
             <CardTitle className="text-2xl">Já tem uma conta?</CardTitle>
             <CardDescription>
-              Faça login para gerenciar seu Baba existente ou entrar em um.
+              Faça login para gerenciar seu {currentBabaName || "Baba existente"} ou entrar em um.
             </CardDescription>
           </CardHeader>
           <CardContent>

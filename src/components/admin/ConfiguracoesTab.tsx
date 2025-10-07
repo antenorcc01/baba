@@ -18,11 +18,13 @@ const ConfiguracoesTab = () => {
   const [monthlyFee, setMonthlyFee] = useState("50");
   const [dailyFee, setDailyFee] = useState("20");
   const [whatsappGroupLink, setWhatsappGroupLink] = useState(""); // Novo estado para o link do WhatsApp
+  const [babaName, setBabaName] = useState(""); // Novo estado para o nome do Baba
 
   const [dbDueDate, setDbDueDate] = useState("10");
   const [dbMonthlyFee, setDbMonthlyFee] = useState("50");
   const [dbDailyFee, setDbDailyFee] = useState("20");
   const [dbWhatsappGroupLink, setDbWhatsappGroupLink] = useState(""); // Novo estado para o link do WhatsApp salvo no DB
+  const [dbBabaName, setDbBabaName] = useState(""); // Novo estado para o nome do Baba salvo no DB
 
   const [isPixConfigOpen, setIsPixConfigOpen] = useState(false);
 
@@ -43,16 +45,19 @@ const ConfiguracoesTab = () => {
         const currentMonthlyFee = settings['monthly_fee_amount'] || "50";
         const currentDailyFee = settings['daily_fee_amount'] || "20";
         const currentWhatsappLink = settings['whatsapp_group_link'] || "";
+        const currentBabaName = settings['baba_name'] || ""; // Carregar o nome do Baba
 
         setDueDate(currentDueDate);
         setMonthlyFee(currentMonthlyFee);
         setDailyFee(currentDailyFee);
         setWhatsappGroupLink(currentWhatsappLink);
+        setBabaName(currentBabaName); // Definir o nome do Baba
 
         setDbDueDate(currentDueDate);
         setDbMonthlyFee(currentMonthlyFee);
         setDbDailyFee(currentDailyFee);
         setDbWhatsappGroupLink(currentWhatsappLink);
+        setDbBabaName(currentBabaName); // Definir o nome do Baba salvo no DB
       } catch (error: any) {
         showError(error.message || "Erro ao carregar configurações.");
       }
@@ -77,6 +82,33 @@ const ConfiguracoesTab = () => {
   return (
     <>
       <div className="space-y-6 py-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Configurações Gerais do Baba</CardTitle>
+            <CardDescription>Ajuste o nome do seu Baba e outras configurações gerais.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="baba-name" className="text-sm font-medium flex-shrink-0">Nome do Baba:</Label>
+              <Input 
+                id="baba-name" 
+                type="text" 
+                className="flex-grow" 
+                value={babaName} 
+                onChange={(e) => setBabaName(e.target.value)} 
+                placeholder="Ex: Baba dos Baianos"
+              />
+              <Button 
+                size="sm" 
+                onClick={() => handleSettingSave('baba_name', babaName, setDbBabaName)} 
+                disabled={babaName === dbBabaName}
+              >
+                <SaveIcon className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Configurações Financeiras</CardTitle>

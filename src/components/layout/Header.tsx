@@ -60,6 +60,7 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const [whatsappLink, setWhatsappLink] = useState<string | null>(null);
+  const [babaName, setBabaName] = useState<string | null>(null); // Novo estado para o nome do Baba
 
   const isAuthPage = location.pathname === '/auth';
   const isWelcomePage = location.pathname === '/';
@@ -70,27 +71,34 @@ export default function Header() {
   const showNavAndProfile = session && !authLoading && profile?.baba_id;
 
   useEffect(() => {
-    const fetchWhatsappLink = async () => {
+    const fetchSettings = async () => {
       const { data, error } = await supabase
         .from('group_settings')
-        .select('setting_value')
-        .eq('setting_key', 'whatsapp_group_link')
-        .single();
+        .select('setting_key, setting_value')
+        .in('setting_key', ['whatsapp_group_link', 'baba_name']); // Buscar também o nome do Baba
 
       if (error && error.code !== 'PGRST116') {
-        console.error("Error fetching WhatsApp link in Header:", error);
+        console.error("Error fetching settings in Header:", error);
         setWhatsappLink(null);
+        setBabaName(null);
       } else if (data) {
-        setWhatsappLink(data.setting_value);
+        const settingsMap = data.reduce((acc, setting) => {
+          acc[setting.setting_key] = setting.setting_value;
+          return acc;
+        }, {} as Record<string, string>);
+        setWhatsappLink(settingsMap['whatsapp_group_link'] || null);
+        setBabaName(settingsMap['baba_name'] || null); // Definir o nome do Baba
       } else {
         setWhatsappLink(null);
+        setBabaName(null);
       }
     };
 
-    if (showNavAndProfile) { // Só busca o link do WhatsApp se o usuário estiver logado e em um baba
-      fetchWhatsappLink();
+    if (showNavAndProfile) {
+      fetchSettings();
     } else {
-      setWhatsappLink(null); // Limpa o link se não estiver logado ou em um baba
+      setWhatsappLink(null);
+      setBabaName(null);
     }
   }, [showNavAndProfile]);
 
@@ -100,7 +108,7 @@ export default function Header() {
       if (error) throw error;
       
       showSuccess("Logout realizado com sucesso!");
-      navigate('/', { replace: true }); // Redireciona para a nova página de boas-vindas
+      navigate('/', { replace: true });
       
     } catch (error: any) {
       console.error('Erro ao fazer logout:', error);
@@ -141,7 +149,7 @@ export default function Header() {
       <div className="container mx-auto px-4 h-28 flex items-center justify-between">
         <Link to={session && profile?.baba_id ? "/dashboard" : "/"} className="flex items-center gap-2">
           <img src="/favicon.png" alt="Logo" className="h-24 w-24" />
-          <span className="text-2xl font-bold text-primary-foreground">Baba dos Baianos</span>
+          <span className="text-2xl font-bold text-primary-foreground">{babaName || "Baba dos Baianos"}</span>
         </Link>
 
         {showNavAndProfile && (
@@ -212,7 +220,7 @@ export default function Header() {
                     <div className="mb-6">
                       <Link to="/" className="flex items-center gap-2">
                         <img src="/favicon.png" alt="Logo" className="h-8 w-8" />
-                        <span className="text-lg font-bold">Baba dos Baianos</span>
+                        <span className="text-lg font-bold">{babaName || "Baba dos Baianos"}</span>
                       </Link>
                     </div>
                     <nav className="flex flex-col gap-2">
