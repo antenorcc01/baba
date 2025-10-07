@@ -94,6 +94,10 @@ const ConfiguracoesTab = () => {
       if (error) throw error;
       dbSetter(value);
       showSuccess("Configuração atualizada com sucesso!");
+
+      if (key === 'baba_name') {
+        window.location.reload();
+      }
     } catch (error: any) {
       showError(error.message || "Erro ao salvar configuração.");
     }
