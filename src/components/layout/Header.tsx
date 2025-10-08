@@ -158,9 +158,9 @@ export default function Header() {
 
   return (
     <header className="bg-primary shadow-md sticky top-0 z-50">
-      <div className="container mx-auto px-4 h-24 flex items-center justify-between">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to={session && profile?.baba_id ? "/dashboard" : "/"} className="flex items-center gap-2">
-          <img src={babaLogoUrl} alt="Logo" className="h-20 w-20 object-contain" />
+          <img src={babaLogoUrl} alt="Logo" className="h-12 w-12 object-contain" />
           <span className="text-2xl font-bold text-primary-foreground">{babaName || "Futebol dos Amigos"}</span>
         </Link>
 
