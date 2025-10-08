@@ -14,7 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { ChromeIcon, ArrowLeftIcon } from "lucide-react";
+import { ChromeIcon, ArrowLeftIcon, KeyRoundIcon } from "lucide-react";
 
 const AuthPage = () => {
   const [loginEmail, setLoginEmail] = useState("");
@@ -26,6 +26,8 @@ const AuthPage = () => {
   const [registerPlayerType, setRegisterPlayerType] = useState("linha");
   const [registerIsMensalista, setRegisterIsMensalista] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [isInvitedUser, setIsInvitedUser] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
 
   const { session, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -33,10 +35,17 @@ const AuthPage = () => {
   const { baba_id, baba_name } = location.state || {};
 
   useEffect(() => {
-    if (!authLoading && session && profile?.baba_id) {
-      navigate('/dashboard', { replace: true });
-    } else if (!authLoading && session && !profile?.baba_id) {
-      navigate('/join-baba', { replace: true });
+    if (!authLoading && session) {
+      // If user is from an invite link, they will have a session but no last_sign_in_at
+      // and an invited_at timestamp.
+      if (session.user.invited_at && !session.user.last_sign_in_at) {
+        setIsInvitedUser(true);
+        setLoginEmail(session.user.email || "");
+      } else if (profile?.baba_id) {
+        navigate('/dashboard', { replace: true });
+      } else {
+        navigate('/join-baba', { replace: true });
+      }
     }
   }, [session, profile, authLoading, navigate]);
 
@@ -105,7 +114,7 @@ const AuthPage = () => {
             phone: phoneWithoutMask,
             player_type: registerPlayerType,
             is_mensalista: registerIsMensalista,
-            baba_id: baba_id, // Inclui o ID do Baba nos metadados
+            baba_id: baba_id,
           }
         }
       });
@@ -134,6 +143,21 @@ const AuthPage = () => {
     }
   };
 
+  const handleSetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      showSuccess("Senha definida com sucesso! Bem-vindo!");
+      // The onAuthStateChange listener will handle the redirect.
+    } catch (error: any) {
+      showError(error.message || "Erro ao definir a senha.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatPhoneNumber = (value: string) => {
     const cleaned = value.replace(/\D/g, '');
     if (cleaned.length <= 2) return `(${cleaned}`;
@@ -150,6 +174,51 @@ const AuthPage = () => {
     return (
       <div className="flex-grow flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (isInvitedUser) {
+    return (
+      <div className="flex-grow flex flex-col bg-background">
+        <main className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center justify-center">
+          <Card className="w-full max-w-md border-primary">
+            <CardHeader>
+              <CardTitle className="text-primary flex items-center gap-2">
+                <KeyRoundIcon />
+                Complete seu Cadastro
+              </CardTitle>
+              <CardDescription>
+                Você foi convidado! Defina uma senha para acessar sua conta.
+              </CardDescription>
+            </CardHeader>
+            <form onSubmit={handleSetPassword}>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="invited-email">E-mail</Label>
+                  <Input id="invited-email" type="email" value={loginEmail} readOnly disabled />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">Crie uma Senha</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Salvando..." : "Definir Senha e Entrar"}
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        </main>
+        <MadeWithDyad />
       </div>
     );
   }

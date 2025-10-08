@@ -6,6 +6,7 @@ import ConvidadosTab from "@/components/admin/ConvidadosTab";
 import FinanceiroTab from "@/components/admin/FinanceiroTab";
 import RegulamentoTab from "@/components/admin/RegulamentoTab";
 import ConfiguracoesTab from "@/components/admin/ConfiguracoesTab";
+import InvitationsTab from "@/components/admin/InvitationsTab"; // Importar a nova aba
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -46,6 +47,7 @@ export default function Administracao() {
             <TabsTrigger value="arenas">Arenas</TabsTrigger>
             <TabsTrigger value="jogadores">Jogadores</TabsTrigger>
             <TabsTrigger value="convidados">Convidados</TabsTrigger>
+            <TabsTrigger value="convites">Convites</TabsTrigger> {/* Adicionar nova trigger */}
             <TabsTrigger value="financeiro">Financeiro</TabsTrigger>
             <TabsTrigger value="regulamento">STJD</TabsTrigger>
             <TabsTrigger value="configuracoes">Configurações</TabsTrigger>
@@ -60,6 +62,9 @@ export default function Administracao() {
         </TabsContent>
         <TabsContent value="convidados">
           <ConvidadosTab />
+        </TabsContent>
+        <TabsContent value="convites"> {/* Adicionar novo conteúdo */}
+          <InvitationsTab />
         </TabsContent>
         <TabsContent value="financeiro">
           <FinanceiroTab />
