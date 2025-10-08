@@ -43,7 +43,7 @@ const Welcome = () => {
       <main className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center justify-center text-center">
         <div className="mb-10">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Bem-vindo ao <TextScramble as="span" className="inline-block text-primary mr-2">{animatedWords[wordIndex]}</TextScramble> dos Amigos!
+            Bem-vindo a(o) <TextScramble as="span" className="inline-block text-primary mr-2">{animatedWords[wordIndex]}</TextScramble> dos Amigos!
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             Organize seus jogos de futebol com facilidade, gerencie jogadores, sorteie times e controle pagamentos. Tudo em um só lugar!
