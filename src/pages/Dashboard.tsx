@@ -58,7 +58,7 @@ interface ChampionInfo {
 const COLORS = ['#0088FE', '#00C49F']; // Colors for the player/guest chart
 
 const Dashboard = () => {
-  const { profile, isSuspended } = useAuth();
+  const { profile, isSuspended, gameTermSingular } = useAuth();
   const [nextGame, setNextGame] = useState<NextGame | null>(null);
   const [newPlayers, setNewPlayers] = useState<NewPlayer[]>([]);
   const [lastRuleUpdate, setLastRuleUpdate] = useState<string | null>(null);
@@ -271,7 +271,7 @@ const Dashboard = () => {
         return {
           variant: "destructive",
           title: "Pagamento Atrasado!",
-          description: `Sua mensalidade está atrasada. Regularize sua situação para poder participar dos babas.`,
+          description: `Sua mensalidade está atrasada. Regularize sua situação para poder participar dos ${gameTermSingular.toLowerCase()}s.`,
         };
       default:
         return null;
@@ -451,7 +451,7 @@ const Dashboard = () => {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card className="lg:col-span-1">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Calendar className="text-primary" /> Próximo Baba</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Calendar className="text-primary" /> Próximo {gameTermSingular}</CardTitle>
             </CardHeader>
             <CardContent>
               {nextGame ? (
@@ -470,7 +470,7 @@ const Dashboard = () => {
                   </div>
                 </div>
               ) : (
-                <p className="text-muted-foreground">Nenhum baba agendado no momento.</p>
+                <p className="text-muted-foreground">Nenhum {gameTermSingular.toLowerCase()} agendado no momento.</p>
               )}
             </CardContent>
             {nextGame && (

@@ -68,7 +68,7 @@ const AuthPage = () => {
 
         if (profileUpdateError) throw profileUpdateError;
         
-        showSuccess(`Você entrou no Baba "${baba_name}" com sucesso!`);
+        showSuccess(`Você entrou no grupo "${baba_name}" com sucesso!`);
       } else {
         showSuccess("Login realizado com sucesso!");
       }
@@ -255,7 +255,7 @@ const AuthPage = () => {
                 <CardHeader>
                   <CardTitle className="text-primary">Acesse sua conta</CardTitle>
                   <CardDescription>
-                    {baba_name ? `Entre para acessar o Baba "${baba_name}"` : "Entre com seu e-mail e senha"}
+                    {baba_name ? `Entre para acessar o grupo "${baba_name}"` : "Entre com seu e-mail e senha"}
                   </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleLogin}>
@@ -320,7 +320,7 @@ const AuthPage = () => {
                 <CardHeader>
                   <CardTitle className="text-primary">Crie sua conta</CardTitle>
                   <CardDescription>
-                    {baba_name ? `Cadastre-se para entrar no Baba "${baba_name}"` : "Cadastre-se para participar dos babas"}
+                    {baba_name ? `Cadastre-se para entrar no grupo "${baba_name}"` : "Cadastre-se para participar dos jogos"}
                   </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleRegister}>

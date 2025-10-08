@@ -158,7 +158,7 @@ const renderSkillStars = (level: number | undefined) => {
 
 const BabaDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { profile, isAdmin } = useAuth();
+  const { profile, isAdmin, gameTermSingular, gameTermPlural } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [isGameDialogOpen, setIsGameDialogOpen] = useState(false);
@@ -188,7 +188,7 @@ const BabaDetailPage = () => {
   if (error || !game) {
     return (
       <div className="flex-grow flex items-center justify-center text-center">
-        <p className="text-red-500">Erro ao carregar o baba: {error?.message || "Baba não encontrado."}</p>
+        <p className="text-red-500">Erro ao carregar o {gameTermSingular}: {error?.message || `${gameTermSingular} não encontrado.`}</p>
       </div>
     );
   }
@@ -316,11 +316,11 @@ const BabaDetailPage = () => {
         .eq('id', game.id);
 
       if (error) throw error;
-      showSuccess("Baba excluído com sucesso!");
+      showSuccess(`${gameTermSingular} excluído com sucesso!`);
       queryClient.invalidateQueries({ queryKey: ['games'] });
       navigate('/babas');
     } catch (error: any) {
-      showError(error.message || "Erro ao excluir baba.");
+      showError(error.message || `Erro ao excluir ${gameTermSingular}.`);
     }
   };
 
@@ -336,7 +336,7 @@ const BabaDetailPage = () => {
             <Button asChild variant="ghost">
               <Link to="/babas" className="flex items-center gap-2 text-sm">
                 <ArrowLeft className="h-4 w-4" />
-                Voltar para todos os babas
+                Voltar para todos os {gameTermPlural.toLowerCase()}
               </Link>
             </Button>
           </div>
@@ -345,8 +345,8 @@ const BabaDetailPage = () => {
         <main className="container mx-auto px-4 py-6 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl capitalize">{format(gameDate, "'Baba de' eeee, dd/MM/yyyy", { locale: ptBR })}</CardTitle>
-              <CardDescription>{game.notes || "Sem observações para este baba."}</CardDescription>
+              <CardTitle className="text-2xl capitalize">{`${gameTermSingular} de ${format(gameDate, "eeee, dd/MM/yyyy", { locale: ptBR })}`}</CardTitle>
+              <CardDescription>{game.notes || `Sem observações para este ${gameTermSingular}.`}</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /><span>{format(gameDate, "HH:mm")}</span></div>
@@ -410,7 +410,7 @@ const BabaDetailPage = () => {
               <CardHeader><CardTitle>Controles de Administrador</CardTitle></CardHeader>
               <CardContent className="flex flex-wrap gap-2">
                 <PlayerPresenceManager gameId={game.id} confirmedPlayerIds={confirmedPlayerIds} onPresenceChange={handlePresenceChange} />
-                <Button variant="outline" onClick={() => setIsGameDialogOpen(true)}><Edit className="mr-2 h-4 w-4" /> Editar Baba</Button>
+                <Button variant="outline" onClick={() => setIsGameDialogOpen(true)}><Edit className="mr-2 h-4 w-4" /> Editar {gameTermSingular}</Button>
                 <Button 
                   variant="default" 
                   onClick={handleStartNewMatchClick}
@@ -420,7 +420,7 @@ const BabaDetailPage = () => {
                   {isStartingNewMatch ? "Iniciando..." : "Iniciar Nova Partida"}
                 </Button>
                 <Button variant="destructive" onClick={handleDeleteGameClick}>
-                  <Trash2Icon className="mr-2 h-4 w-4" /> Excluir Baba
+                  <Trash2Icon className="mr-2 h-4 w-4" /> Excluir {gameTermSingular}
                 </Button>
               </CardContent>
             </Card>
@@ -431,9 +431,9 @@ const BabaDetailPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ListIcon className="h-5 w-5" />
-                  Partidas do Baba
+                  Partidas do {gameTermSingular}
                 </CardTitle>
-                <CardDescription>Gerencie as partidas jogadas neste baba.</CardDescription>
+                <CardDescription>Gerencie as partidas jogadas neste {gameTermSingular.toLowerCase()}.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -560,15 +560,15 @@ const BabaDetailPage = () => {
       <AlertDialog open={isDeleteGameDialogOpen} onOpenChange={setIsDeleteGameDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar Exclusão do Baba?</AlertDialogTitle>
+            <AlertDialogTitle>Confirmar Exclusão do {gameTermSingular}?</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir o baba de "<strong>{format(gameDate, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</strong>"? Esta ação é irreversível e removerá todas as presenças, times gerados, partidas e gols associados.
+              Tem certeza que deseja excluir o {gameTermSingular.toLowerCase()} de "<strong>{format(gameDate, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</strong>"? Esta ação é irreversível e removerá todas as presenças, times gerados, partidas e gols associados.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmDeleteGame} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Excluir Baba
+              Excluir {gameTermSingular}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

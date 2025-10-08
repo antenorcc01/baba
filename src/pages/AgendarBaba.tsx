@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const AgendarBaba = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { profile, gameTermSingular } = useAuth();
 
   const handleFormSubmit = async (data: GameFormData) => {
     setIsSubmitting(true);
@@ -35,10 +35,10 @@ const AgendarBaba = () => {
 
       if (error) throw error;
 
-      showSuccess("Baba agendado com sucesso!");
+      showSuccess(`${gameTermSingular} agendado com sucesso!`);
       navigate("/babas");
     } catch (error: any) {
-      showError(error.message || "Erro ao agendar o baba.");
+      showError(error.message || `Erro ao agendar o ${gameTermSingular}.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -52,8 +52,8 @@ const AgendarBaba = () => {
     <div className="container mx-auto py-8">
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>Agendar Novo Baba</CardTitle>
-          <CardDescription>Preencha os detalhes para criar um novo baba.</CardDescription>
+          <CardTitle>Agendar Novo {gameTermSingular}</CardTitle>
+          <CardDescription>Preencha os detalhes para criar um novo {gameTermSingular}.</CardDescription>
         </CardHeader>
         <CardContent>
           <GameForm

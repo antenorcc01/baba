@@ -39,7 +39,7 @@ const Babas = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [loadingGameId, setLoadingGameId] = useState<number | null>(null);
-  const { isAdmin, profile } = useAuth();
+  const { isAdmin, profile, gameTermSingular, gameTermPlural } = useAuth();
 
   const fetchGames = useCallback(async () => {
     const { data, error } = await supabase
@@ -57,11 +57,11 @@ const Babas = () => {
 
     if (error) {
       console.error("Error fetching games:", error);
-      showError("Erro ao buscar os babas.");
+      showError(`Erro ao buscar os ${gameTermPlural.toLowerCase()}.`);
     } else if (data) {
       setGames(data as Game[]);
     }
-  }, []);
+  }, [gameTermPlural]);
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -82,7 +82,7 @@ const Babas = () => {
     const isGameFull = totalPlayers >= game.max_players;
 
     if (!isConfirmed && isGameFull) {
-      showError("O baba já está lotado.");
+      showError(`O ${gameTermSingular.toLowerCase()} já está lotado.`);
       return;
     }
     if (!isConfirmed && profile.is_suspended) {
@@ -135,17 +135,17 @@ const Babas = () => {
   return (
     <div className="flex-grow container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Próximos Babas</h1>
+        <h1 className="text-3xl font-bold">Próximos {gameTermPlural}</h1>
         {isAdmin && (
           <Button asChild>
-            <Link to="/admin/baba/novo">Agendar Novo Baba</Link>
+            <Link to="/admin/baba/novo">Agendar Novo {gameTermSingular}</Link>
           </Button>
         )}
       </div>
 
       {upcomingGames.length === 0 ? (
         <div className="text-center py-16 bg-card rounded-lg">
-          <p className="text-muted-foreground">Nenhum baba agendado no momento.</p>
+          <p className="text-muted-foreground">Nenhum {gameTermSingular.toLowerCase()} agendado no momento.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -159,7 +159,7 @@ const Babas = () => {
               <Card key={game.id} className="flex flex-col">
                 <CardHeader>
                   <CardTitle className="text-primary capitalize">
-                    {format(gameDate, "'Baba de' eeee, dd/MM", { locale: ptBR })}
+                    {`${gameTermSingular} de ${format(gameDate, "eeee, dd/MM", { locale: ptBR })}`}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -173,14 +173,14 @@ const Babas = () => {
                     <AlertDialog>
                       <AlertDialogTrigger asChild><Button variant="destructive" size="sm" className="w-full" disabled={loadingGameId === game.id}>{loadingGameId === game.id ? 'Cancelando...' : 'Cancelar Presença'}</Button></AlertDialogTrigger>
                       <AlertDialogContent>
-                        <AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Esta ação irá remover sua presença deste baba. Você poderá se inscrever novamente se houver vagas disponíveis.</AlertDialogDescription></AlertDialogHeader>
+                        <AlertDialogHeader><AlertDialogTitle>Você tem certeza?</AlertDialogTitle><AlertDialogDescription>Esta ação irá remover sua presença deste {gameTermSingular.toLowerCase()}. Você poderá se inscrever novamente se houver vagas disponíveis.</AlertDialogDescription></AlertDialogHeader>
                         <AlertDialogFooter><AlertDialogCancel>Voltar</AlertDialogCancel><AlertDialogAction onClick={() => handlePresenceToggle(game, true)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Confirmar Cancelamento</AlertDialogAction></AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
                   ) : (
                     <Button variant="default" size="sm" className="w-full" onClick={() => handlePresenceToggle(game, false)} disabled={loadingGameId === game.id || isGameFull}>{loadingGameId === game.id ? 'Confirmando...' : 'Confirmar Presença'}</Button>
                   )}
-                  <Button asChild variant="secondary" size="sm" className="w-full"><Link to={`/baba/${game.id}`}>{isAdmin ? 'Gerenciar Baba' : 'Detalhes do Baba'}</Link></Button>
+                  <Button asChild variant="secondary" size="sm" className="w-full"><Link to={`/baba/${game.id}`}>{isAdmin ? `Gerenciar ${gameTermSingular}` : `Detalhes do ${gameTermSingular}`}</Link></Button>
                 </CardFooter>
               </Card>
             );
@@ -191,7 +191,7 @@ const Babas = () => {
       {finishedGames.length > 0 && (
         <div className="mt-12">
           <Separator className="my-8" />
-          <h2 className="text-2xl font-bold mb-6">Babas Finalizados</h2>
+          <h2 className="text-2xl font-bold mb-6">{gameTermPlural} Finalizados</h2>
           <div className="space-y-4">
             {finishedGames.map((game) => {
               const totalPlayers = game.games_players.length + (game.games_guest_players[0]?.count || 0);

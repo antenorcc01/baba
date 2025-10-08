@@ -21,7 +21,7 @@ interface Profile {
   titles: number;
   skill_level: number;
   total_goals: number;
-  baba_id: string | null; // Adicionado baba_id
+  baba_id: string | null;
 }
 
 interface AuthContextType {
@@ -31,6 +31,8 @@ interface AuthContextType {
   isAdmin: boolean;
   isSuspended: boolean;
   loading: boolean;
+  gameTermSingular: string;
+  gameTermPlural: string;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -40,6 +42,8 @@ const AuthContext = createContext<AuthContextType>({
   isAdmin: false,
   isSuspended: false,
   loading: true,
+  gameTermSingular: "Baba",
+  gameTermPlural: "Babas",
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -49,6 +53,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuspended, setIsSuspended] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [gameTermSingular, setGameTermSingular] = useState("Baba");
+  const [gameTermPlural, setGameTermPlural] = useState("Babas");
   const initialLoadCompleted = useRef(false);
 
   const getProfileAndSetStates = async (currentUser: User | null) => {
@@ -56,22 +62,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setProfile(null);
       setIsAdmin(false);
       setIsSuspended(false);
+      setGameTermSingular("Baba");
+      setGameTermPlural("Babas");
       return;
     }
 
     try {
       const { data: userProfile, error } = await supabase
         .from('profiles')
-        .select('id, full_name, phone, player_type, profile_picture_url, role, payment_status, is_mensalista, is_deleted, is_suspended, suspension_end_date, instagram, titles, skill_level, total_goals, baba_id') // Incluir baba_id
+        .select('*')
         .eq('id', currentUser.id)
         .single();
 
       if (error && error.code !== 'PGRST116') {
         console.error("Error fetching profile:", error);
-        setProfile(null);
-        setIsAdmin(false);
-        setIsSuspended(false);
-        return;
+        throw error;
       }
 
       if (userProfile) {
@@ -95,16 +100,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
         setIsSuspended(suspensionStatus);
+
+        // Fetch game terms
+        if (userProfile.baba_id) {
+          const { data: settings, error: settingsError } = await supabase
+            .from('group_settings')
+            .select('setting_key, setting_value')
+            .in('setting_key', ['game_term_singular', 'game_term_plural'])
+            .eq('baba_id', userProfile.baba_id);
+          
+          if (settingsError) console.error("Error fetching game terms:", settingsError);
+
+          const terms = settings?.reduce((acc, setting) => {
+            acc[setting.setting_key] = setting.setting_value;
+            return acc;
+          }, {} as Record<string, string>) || {};
+
+          setGameTermSingular(terms['game_term_singular'] || "Baba");
+          setGameTermPlural(terms['game_term_plural'] || "Babas");
+        }
+
       } else {
         setProfile(null);
         setIsAdmin(false);
         setIsSuspended(false);
+        setGameTermSingular("Baba");
+        setGameTermPlural("Babas");
       }
     } catch (err) {
       console.error("Error in getProfileAndSetStates:", err);
       setProfile(null);
       setIsAdmin(false);
       setIsSuspended(false);
+      setGameTermSingular("Baba");
+      setGameTermPlural("Babas");
     }
   };
 
@@ -160,6 +189,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     isAdmin,
     isSuspended,
     loading,
+    gameTermSingular,
+    gameTermPlural,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

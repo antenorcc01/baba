@@ -66,13 +66,13 @@ const Welcome = () => {
               <Button asChild size="lg" className="w-full">
                 <Link to="/administer-baba">
                   <PlusCircleIcon className="mr-2 h-5 w-5" />
-                  Criar um Novo Baba
+                  Criar um Novo Grupo
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="w-full">
                 <Link to="/join-baba">
                   <LogInIcon className="mr-2 h-5 w-5" />
-                  Entrar em um Baba Existente
+                  Entrar em um Grupo Existente
                 </Link>
               </Button>
             </div>
@@ -84,8 +84,8 @@ const Welcome = () => {
             <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-primary-foreground font-bold text-xl">📅</span>
             </div>
-            <h3 className="font-bold text-lg mb-2">Agende Babas</h3>
-            <p className="text-muted-foreground">Organize jogos semanais com facilidade</p>
+            <h3 className="font-bold text-lg mb-2">Agende Jogos</h3>
+            <p className="text-muted-foreground">Organize partidas semanais com facilidade</p>
           </div>
           
           <div className="bg-card p-6 rounded-lg shadow-sm border text-center">

@@ -28,7 +28,7 @@ interface PresenceButtonProps {
 }
 
 const PresenceButton = ({ gameId, isConfirmed, isGameFull, isGameFinished, isSuspended, className }: PresenceButtonProps) => {
-  const { profile } = useAuth();
+  const { profile, gameTermSingular } = useAuth();
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
 
@@ -38,7 +38,7 @@ const PresenceButton = ({ gameId, isConfirmed, isGameFull, isGameFinished, isSus
       return;
     }
     if (isGameFull) {
-      showError("O baba já está lotado.");
+      showError(`O ${gameTermSingular.toLowerCase()} já está lotado.`);
       return;
     }
     if (isSuspended) {
@@ -83,7 +83,7 @@ const PresenceButton = ({ gameId, isConfirmed, isGameFull, isGameFinished, isSus
   };
 
   if (isGameFinished) {
-    return <Button size="sm" disabled className={className}>Baba finalizado</Button>;
+    return <Button size="sm" disabled className={className}>{gameTermSingular} finalizado</Button>;
   }
 
   if (isConfirmed) {
@@ -98,7 +98,7 @@ const PresenceButton = ({ gameId, isConfirmed, isGameFull, isGameFinished, isSus
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação irá remover sua presença deste baba. Você poderá se inscrever novamente se houver vagas disponíveis.
+              Esta ação irá remover sua presença deste {gameTermSingular.toLowerCase()}. Você poderá se inscrever novamente se houver vagas disponíveis.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

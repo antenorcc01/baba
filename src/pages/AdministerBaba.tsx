@@ -98,14 +98,14 @@ const AdministerBaba = () => {
 
       if (signInError) throw signInError;
 
-      showSuccess(`Baba "${babaName}" criado com sucesso! Você é o administrador.`);
+      showSuccess(`Grupo "${babaName}" criado com sucesso! Você é o administrador.`);
       // The AuthProvider will detect the new session and redirect to the dashboard.
       // Forcing a reload can sometimes help ensure all context is fresh.
       window.location.href = '/dashboard';
 
     } catch (error: any) {
-      console.error("Erro ao criar Baba:", error);
-      showError(error.message || "Erro ao criar o Baba.");
+      console.error("Erro ao criar Grupo:", error);
+      showError(error.message || "Erro ao criar o Grupo.");
     } finally {
       setLoading(false);
     }
@@ -132,14 +132,14 @@ const AdministerBaba = () => {
         <Card className="border-primary">
           <CardHeader className="text-center">
             <PlusCircleIcon className="h-12 w-12 text-primary mx-auto mb-4" />
-            <CardTitle className="text-2xl">Criar Novo Baba</CardTitle>
+            <CardTitle className="text-2xl">Criar Novo Grupo</CardTitle>
             <CardDescription>
               Crie seu grupo de futebol e seja o administrador.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="baba-name">Nome do seu Baba</Label>
+              <Label htmlFor="baba-name">Nome do seu Grupo</Label>
               <Input
                 id="baba-name"
                 placeholder="Ex: Baba dos Amigos"
@@ -233,10 +233,10 @@ const AdministerBaba = () => {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Criando Baba e Admin...
+                  Criando Grupo e Admin...
                 </>
               ) : (
-                "Criar Meu Baba e Administrador"
+                "Criar Meu Grupo e Administrador"
               )}
             </Button>
           </CardContent>
@@ -249,7 +249,7 @@ const AdministerBaba = () => {
             <LogInIcon className="h-12 w-12 text-accent mx-auto mb-4" />
             <CardTitle className="text-2xl">Já tem uma conta?</CardTitle>
             <CardDescription>
-              Faça login para gerenciar seu {currentBabaName || "Baba existente"} ou entrar em um.
+              Faça login para gerenciar seu {currentBabaName || "grupo existente"} ou entrar em um.
             </CardDescription>
           </CardHeader>
           <CardContent>

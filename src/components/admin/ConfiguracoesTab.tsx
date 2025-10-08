@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import SendMessageForm from "@/components/admin/SendMessageForm";
 import { useAuth } from "@/contexts/AuthContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const ConfiguracoesTab = () => {
   const { profile } = useAuth();
@@ -22,6 +23,7 @@ const ConfiguracoesTab = () => {
   const [whatsappGroupLink, setWhatsappGroupLink] = useState("");
   const [babaName, setBabaName] = useState("");
   const [babaLogoUrl, setBabaLogoUrl] = useState<string | null>("/favicon.png");
+  const [gameTerm, setGameTerm] = useState("Baba");
 
   const [dbDueDate, setDbDueDate] = useState("10");
   const [dbMonthlyFee, setDbMonthlyFee] = useState("50");
@@ -29,6 +31,7 @@ const ConfiguracoesTab = () => {
   const [dbWhatsappGroupLink, setDbWhatsappGroupLink] = useState("");
   const [dbBabaName, setDbBabaName] = useState("");
   const [dbBabaLogoUrl, setDbBabaLogoUrl] = useState<string | null>("/favicon.png");
+  const [dbGameTerm, setDbGameTerm] = useState("Baba");
 
   const [isPixConfigOpen, setIsPixConfigOpen] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -55,6 +58,7 @@ const ConfiguracoesTab = () => {
         const currentWhatsappLink = settings['whatsapp_group_link'] || "";
         const currentBabaName = settings['baba_name'] || "";
         const currentBabaLogoUrl = settings['baba_logo_url'] || "/favicon.png";
+        const currentGameTerm = settings['game_term_singular'] || "Baba";
 
         setDueDate(currentDueDate);
         setMonthlyFee(currentMonthlyFee);
@@ -62,6 +66,7 @@ const ConfiguracoesTab = () => {
         setWhatsappGroupLink(currentWhatsappLink);
         setBabaName(currentBabaName);
         setBabaLogoUrl(currentBabaLogoUrl);
+        setGameTerm(currentGameTerm);
 
         setDbDueDate(currentDueDate);
         setDbMonthlyFee(currentMonthlyFee);
@@ -69,6 +74,7 @@ const ConfiguracoesTab = () => {
         setDbWhatsappGroupLink(currentWhatsappLink);
         setDbBabaName(currentBabaName);
         setDbBabaLogoUrl(currentBabaLogoUrl);
+        setDbGameTerm(currentGameTerm);
       } catch (error: any) {
         showError(error.message || "Erro ao carregar configurações.");
       }
@@ -84,7 +90,6 @@ const ConfiguracoesTab = () => {
       return;
     }
     try {
-      // Update group_settings
       const { error: settingsError } = await supabase
         .from('group_settings')
         .upsert(
@@ -94,7 +99,6 @@ const ConfiguracoesTab = () => {
       
       if (settingsError) throw settingsError;
 
-      // If the key is 'baba_name', also update the 'tenants' table.
       if (key === 'baba_name') {
         const { error: tenantUpdateError } = await supabase
           .from('tenants')
@@ -112,6 +116,27 @@ const ConfiguracoesTab = () => {
       }
     } catch (error: any) {
       showError(error.message || "Erro ao salvar configuração.");
+    }
+  };
+
+  const handleTermSave = async () => {
+    const pluralMap: { [key: string]: string } = {
+      "Futebol": "Futebóis",
+      "Pelada": "Peladas",
+      "Racha": "Rachas",
+      "Rachão": "Rachões",
+      "Baba": "Babas",
+    };
+    const singular = gameTerm;
+    const plural = pluralMap[singular] || `${singular}s`;
+
+    try {
+      await handleSettingSave('game_term_singular', singular, setDbGameTerm);
+      await handleSettingSave('game_term_plural', plural, () => {}); // No dbSetter needed for plural
+      showSuccess("Terminologia atualizada. A página será recarregada para aplicar as mudanças.");
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (error) {
+      // Error is already handled in handleSettingSave
     }
   };
 
@@ -148,19 +173,19 @@ const ConfiguracoesTab = () => {
       <div className="space-y-6 py-6">
         <Card>
           <CardHeader>
-            <CardTitle>Identidade Visual do Baba</CardTitle>
-            <CardDescription>Personalize o nome e a logo do seu grupo.</CardDescription>
+            <CardTitle>Identidade Visual e Terminologia</CardTitle>
+            <CardDescription>Personalize o nome, a logo e os termos usados no seu grupo.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-2">
-              <Label htmlFor="baba-name" className="text-sm font-medium flex-shrink-0">Nome do Baba:</Label>
+              <Label htmlFor="baba-name" className="text-sm font-medium flex-shrink-0">Nome do Grupo:</Label>
               <Input 
                 id="baba-name" 
                 type="text" 
                 className="flex-grow" 
                 value={babaName} 
                 onChange={(e) => setBabaName(e.target.value)} 
-                placeholder="Ex: Baba dos Baianos"
+                placeholder="Ex: Baba dos Amigos"
               />
               <Button 
                 size="sm" 
@@ -170,8 +195,30 @@ const ConfiguracoesTab = () => {
                 <SaveIcon className="h-4 w-4" />
               </Button>
             </div>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="game-term" className="text-sm font-medium flex-shrink-0">Termo para o Jogo:</Label>
+              <Select value={gameTerm} onValueChange={setGameTerm}>
+                <SelectTrigger id="game-term" className="flex-grow">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Baba">Baba</SelectItem>
+                  <SelectItem value="Futebol">Futebol</SelectItem>
+                  <SelectItem value="Pelada">Pelada</SelectItem>
+                  <SelectItem value="Racha">Racha</SelectItem>
+                  <SelectItem value="Rachão">Rachão</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button 
+                size="sm" 
+                onClick={handleTermSave} 
+                disabled={gameTerm === dbGameTerm}
+              >
+                <SaveIcon className="h-4 w-4" />
+              </Button>
+            </div>
             <div className="space-y-2">
-              <Label>Logo do Baba</Label>
+              <Label>Logo do Grupo</Label>
               <div className="flex items-center gap-4">
                 <img 
                   src={babaLogoUrl || "/favicon.png"} 

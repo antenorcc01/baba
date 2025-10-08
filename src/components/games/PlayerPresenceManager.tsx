@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { showSuccess, showError } from "@/utils/toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Profile {
   id: string;
@@ -24,6 +25,7 @@ const PlayerPresenceManager = ({ gameId, confirmedPlayerIds, onPresenceChange }:
   const [loading, setLoading] = useState(false);
   const [allPlayers, setAllPlayers] = useState<Profile[]>([]);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
+  const { gameTermSingular } = useAuth();
 
   useEffect(() => {
     if (isOpen) {
@@ -90,7 +92,7 @@ const PlayerPresenceManager = ({ gameId, confirmedPlayerIds, onPresenceChange }:
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Adicionar Jogador ao Baba</DialogTitle>
+          <DialogTitle>Adicionar Jogador ao {gameTermSingular}</DialogTitle>
           <DialogDescription>
             Selecione um jogador cadastrado para adicionar à lista de presença.
           </DialogDescription>

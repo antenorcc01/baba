@@ -43,7 +43,7 @@ const JoinBaba = () => {
         if (error) throw error;
         setAvailableTenants(data || []);
       } catch (error: any) {
-        showError(error.message || "Erro ao carregar a lista de Babas.");
+        showError(error.message || "Erro ao carregar a lista de grupos.");
       } finally {
         setLoading(false);
       }
@@ -53,11 +53,11 @@ const JoinBaba = () => {
 
   const handleJoinBaba = async () => {
     if (!selectedTenantId) {
-      showError("Por favor, selecione um Baba para entrar.");
+      showError("Por favor, selecione um grupo para entrar.");
       return;
     }
     if (!session?.user) {
-      showError("Você precisa estar logado para entrar em um Baba.");
+      showError("Você precisa estar logado para entrar em um grupo.");
       return;
     }
 
@@ -71,11 +71,11 @@ const JoinBaba = () => {
       if (error) throw error;
 
       const selectedTenantName = availableTenants.find(t => t.id === selectedTenantId)?.name;
-      showSuccess(`Você entrou no Baba "${selectedTenantName}" com sucesso!`);
+      showSuccess(`Você entrou no grupo "${selectedTenantName}" com sucesso!`);
       window.location.href = '/dashboard'; // Forçar recarregamento para garantir que o contexto seja atualizado
     } catch (error: any) {
-      console.error("Erro ao entrar no Baba:", error);
-      showError(error.message || "Erro ao entrar no Baba.");
+      console.error("Erro ao entrar no grupo:", error);
+      showError(error.message || "Erro ao entrar no grupo.");
     } finally {
       setIsJoining(false);
     }
@@ -106,16 +106,16 @@ const JoinBaba = () => {
         <Card className="border-accent">
           <CardHeader className="text-center">
             <SearchIcon className="h-12 w-12 text-accent mx-auto mb-4" />
-            <CardTitle className="text-2xl">Entrar em um Baba Existente</CardTitle>
+            <CardTitle className="text-2xl">Entrar em um Grupo Existente</CardTitle>
             <CardDescription>
-              Selecione um Baba da lista para se juntar.
+              Selecione um grupo da lista para se juntar.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="relative">
               <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="Buscar Baba..."
+                placeholder="Buscar grupo..."
                 className="pl-10"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -123,10 +123,10 @@ const JoinBaba = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="select-baba">Selecione o Baba</Label>
+              <Label htmlFor="select-baba">Selecione o Grupo</Label>
               <Select onValueChange={setSelectedTenantId} value={selectedTenantId || ''} disabled={isJoining}>
                 <SelectTrigger id="select-baba">
-                  <SelectValue placeholder="Escolha um Baba" />
+                  <SelectValue placeholder="Escolha um grupo" />
                 </SelectTrigger>
                 <SelectContent>
                   {filteredTenants.length > 0 ? (
@@ -136,7 +136,7 @@ const JoinBaba = () => {
                       </SelectItem>
                     ))
                   ) : (
-                    <div className="p-2 text-sm text-muted-foreground">Nenhum Baba encontrado.</div>
+                    <div className="p-2 text-sm text-muted-foreground">Nenhum grupo encontrado.</div>
                   )}
                 </SelectContent>
               </Select>
@@ -145,13 +145,13 @@ const JoinBaba = () => {
             {session && !profile?.baba_id ? (
               <Button onClick={handleJoinBaba} className="w-full" disabled={isJoining || !selectedTenantId}>
                 {isJoining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Entrar no Baba
+                Entrar no Grupo
               </Button>
             ) : (
               <div className="space-y-2 pt-4 border-t">
                 <Button asChild className="w-full" disabled={!selectedTenantId}>
                   <Link to="/auth" state={{ baba_id: selectedTenantId, baba_name: availableTenants.find(t => t.id === selectedTenantId)?.name }}>
-                    <UserPlusIcon className="mr-2 h-4 w-4" /> Criar Conta para este Baba
+                    <UserPlusIcon className="mr-2 h-4 w-4" /> Criar Conta para este Grupo
                   </Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full" disabled={!selectedTenantId}>

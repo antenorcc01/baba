@@ -12,6 +12,7 @@ import GameForm, { GameFormData } from "@/components/games/GameForm";
 import { supabase } from "@/integrations/supabase/client";
 import { showSuccess, showError } from "@/utils/toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Game {
   id: number;
@@ -38,6 +39,7 @@ interface GameDialogProps {
 const GameDialog = ({ isOpen, onOpenChange, game }: GameDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
+  const { gameTermSingular } = useAuth();
 
   const handleFormSubmit = async (data: GameFormData) => {
     setIsSubmitting(true);
@@ -70,11 +72,11 @@ const GameDialog = ({ isOpen, onOpenChange, game }: GameDialogProps) => {
 
       if (error) throw error;
 
-      showSuccess(game ? "Baba atualizado com sucesso!" : "Baba agendado com sucesso!");
+      showSuccess(game ? `${gameTermSingular} atualizado com sucesso!` : `${gameTermSingular} agendado com sucesso!`);
       queryClient.invalidateQueries({ queryKey: ["games"] });
       onOpenChange(false);
     } catch (error: any) {
-      showError(error.message || (game ? "Erro ao atualizar o baba." : "Erro ao agendar o baba."));
+      showError(error.message || (game ? `Erro ao atualizar o ${gameTermSingular.toLowerCase()}.` : `Erro ao agendar o ${gameTermSingular.toLowerCase()}.`));
     } finally {
       setIsSubmitting(false);
     }
@@ -88,9 +90,9 @@ const GameDialog = ({ isOpen, onOpenChange, game }: GameDialogProps) => {
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{game ? "Editar Baba" : "Agendar Novo Baba"}</DialogTitle>
+          <DialogTitle>{game ? `Editar ${gameTermSingular}` : `Agendar Novo ${gameTermSingular}`}</DialogTitle>
           <DialogDescription>
-            {game ? "Edite as informações do baba." : "Preencha os detalhes para criar um novo baba."}
+            {game ? `Edite as informações do ${gameTermSingular.toLowerCase()}.` : `Preencha os detalhes para criar um novo ${gameTermSingular.toLowerCase()}.`}
           </DialogDescription>
         </DialogHeader>
         <GameForm
