@@ -56,7 +56,7 @@ function MobileNavLink({ to, children, Icon }: { to: string; children: React.Rea
   }
 
 export default function Header() {
-  const { session, profile, isAdmin, loading: authLoading } = useAuth();
+  const { session, profile, isAdmin, loading: authLoading, gameTermPlural } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [whatsappLink, setWhatsappLink] = useState<string | null>(null);
@@ -144,7 +144,7 @@ export default function Header() {
 
   const navItems = [
     { path: "/dashboard", label: "Dashboard", Icon: Home },
-    { path: "/babas", label: "Babas", Icon: Calendar },
+    { path: "/babas", label: gameTermPlural, Icon: Calendar },
     { path: "/torneios", label: "Torneios", Icon: TrophyIcon },
     { path: "/arenas", label: "Arenas", Icon: MapPinIcon },
     { path: "/jogadores", label: "Jogadores", Icon: Users },
