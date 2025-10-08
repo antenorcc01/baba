@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Moon, Sun, Check } from "lucide-react" // Importado o ícone Check
+import { Moon, Sun, Check } from "lucide-react"
 import { useTheme } from "next-themes"
 
 import { Button } from "@/components/ui/button"
@@ -33,12 +33,6 @@ export function ModeToggle() {
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("system")}>
           Sistema {theme === "system" && <Check className="ml-auto h-4 w-4" />}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("bbmp")}>
-          BBMP {theme === "bbmp" && <Check className="ml-auto h-4 w-4" />}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("leao")}>
-          LEÃO {theme === "leao" && <Check className="ml-auto h-4 w-4" />}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

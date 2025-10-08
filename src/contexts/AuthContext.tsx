@@ -5,6 +5,58 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Session, User } from '@supabase/supabase-js';
 import { showSuccess } from '@/utils/toast';
 
+// Helper para converter HEX para HSL
+function hexToHsl(hex: string): { h: number; s: number; l: number } | null {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result) return null;
+
+  let r = parseInt(result[1], 16) / 255;
+  let g = parseInt(result[2], 16) / 255;
+  let b = parseInt(result[3], 16) / 255;
+
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0, l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+
+  return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+}
+
+// Helper para aplicar ou remover as variáveis CSS
+const applyThemeColors = (colors: Record<string, string>) => {
+  const root = document.documentElement;
+  const colorMap = {
+    theme_primary_color: 'primary',
+    theme_secondary_color: 'secondary',
+    theme_accent_color: 'accent',
+  };
+
+  Object.entries(colorMap).forEach(([settingKey, themeKey]) => {
+    const hex = colors[settingKey];
+    if (hex) {
+      const hsl = hexToHsl(hex);
+      if (hsl) {
+        root.style.setProperty(`--custom-${themeKey}-h`, hsl.h.toString());
+        root.style.setProperty(`--custom-${themeKey}-s`, `${hsl.s}%`);
+        root.style.setProperty(`--custom-${themeKey}-l`, `${hsl.l}%`);
+      }
+    } else {
+      root.style.removeProperty(`--custom-${themeKey}-h`);
+      root.style.removeProperty(`--custom-${themeKey}-s`);
+      root.style.removeProperty(`--custom-${themeKey}-l`);
+    }
+  });
+};
+
 interface Profile {
   id: string;
   full_name: string | null;
@@ -64,6 +116,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsSuspended(false);
       setGameTermSingular("Baba");
       setGameTermPlural("Babas");
+      applyThemeColors({}); // Limpa as cores customizadas no logout
       return;
     }
 
@@ -74,10 +127,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .eq('id', currentUser.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error("Error fetching profile:", error);
-        throw error;
-      }
+      if (error && error.code !== 'PGRST116') throw error;
 
       if (userProfile) {
         setProfile(userProfile as Profile);
@@ -94,30 +144,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               is_suspended: false, 
               suspension_reason: null, 
               suspension_end_date: null 
-            }).eq('id', currentUser.id).then(({ error: updateError }) => {
-              if (updateError) console.error("Error clearing expired suspension:", updateError);
-            });
+            }).eq('id', currentUser.id);
           }
         }
         setIsSuspended(suspensionStatus);
 
-        // Fetch game terms
         if (userProfile.baba_id) {
           const { data: settings, error: settingsError } = await supabase
             .from('group_settings')
             .select('setting_key, setting_value')
-            .in('setting_key', ['game_term_singular', 'game_term_plural'])
+            .in('setting_key', ['game_term_singular', 'game_term_plural', 'theme_primary_color', 'theme_secondary_color', 'theme_accent_color'])
             .eq('baba_id', userProfile.baba_id);
           
-          if (settingsError) console.error("Error fetching game terms:", settingsError);
+          if (settingsError) console.error("Error fetching settings:", settingsError);
 
-          const terms = settings?.reduce((acc, setting) => {
+          const settingsMap = settings?.reduce((acc, setting) => {
             acc[setting.setting_key] = setting.setting_value;
             return acc;
           }, {} as Record<string, string>) || {};
 
-          setGameTermSingular(terms['game_term_singular'] || "Baba");
-          setGameTermPlural(terms['game_term_plural'] || "Babas");
+          setGameTermSingular(settingsMap['game_term_singular'] || "Baba");
+          setGameTermPlural(settingsMap['game_term_plural'] || "Babas");
+          applyThemeColors(settingsMap);
         }
 
       } else {
@@ -126,6 +174,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsSuspended(false);
         setGameTermSingular("Baba");
         setGameTermPlural("Babas");
+        applyThemeColors({});
       }
     } catch (err) {
       console.error("Error in getProfileAndSetStates:", err);
@@ -134,6 +183,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsSuspended(false);
       setGameTermSingular("Baba");
       setGameTermPlural("Babas");
+      applyThemeColors({});
     }
   };
 

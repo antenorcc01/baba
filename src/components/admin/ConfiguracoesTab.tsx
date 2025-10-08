@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { SaveIcon, SettingsIcon, MessageCircle, UploadIcon, Loader2 } from "lucide-react";
+import { SaveIcon, SettingsIcon, MessageCircle, UploadIcon, Loader2, Palette } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { showSuccess, showError } from "@/utils/toast";
 import PixConfigDialog from "@/components/admin/PixConfigDialog";
@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const ConfiguracoesTab = () => {
   const { profile } = useAuth();
+  // ... outros estados
   const [dueDate, setDueDate] = useState("10");
   const [monthlyFee, setMonthlyFee] = useState("50");
   const [dailyFee, setDailyFee] = useState("20");
@@ -25,6 +26,10 @@ const ConfiguracoesTab = () => {
   const [babaLogoUrl, setBabaLogoUrl] = useState<string | null>("/favicon.png");
   const [gameTerm, setGameTerm] = useState("Baba");
 
+  const [primaryColor, setPrimaryColor] = useState("#006437");
+  const [secondaryColor, setSecondaryColor] = useState("#f0f9ff");
+  const [accentColor, setAccentColor] = useState("#007a43");
+
   const [dbDueDate, setDbDueDate] = useState("10");
   const [dbMonthlyFee, setDbMonthlyFee] = useState("50");
   const [dbDailyFee, setDbDailyFee] = useState("20");
@@ -32,6 +37,10 @@ const ConfiguracoesTab = () => {
   const [dbBabaName, setDbBabaName] = useState("");
   const [dbBabaLogoUrl, setDbBabaLogoUrl] = useState<string | null>("/favicon.png");
   const [dbGameTerm, setDbGameTerm] = useState("Baba");
+
+  const [dbPrimaryColor, setDbPrimaryColor] = useState("#006437");
+  const [dbSecondaryColor, setDbSecondaryColor] = useState("#f0f9ff");
+  const [dbAccentColor, setDbAccentColor] = useState("#007a43");
 
   const [isPixConfigOpen, setIsPixConfigOpen] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -59,6 +68,9 @@ const ConfiguracoesTab = () => {
         const currentBabaName = settings['baba_name'] || "";
         const currentBabaLogoUrl = settings['baba_logo_url'] || "/favicon.png";
         const currentGameTerm = settings['game_term_singular'] || "Baba";
+        const currentPrimaryColor = settings['theme_primary_color'] || "#006437";
+        const currentSecondaryColor = settings['theme_secondary_color'] || "#f0f9ff";
+        const currentAccentColor = settings['theme_accent_color'] || "#007a43";
 
         setDueDate(currentDueDate);
         setMonthlyFee(currentMonthlyFee);
@@ -67,6 +79,9 @@ const ConfiguracoesTab = () => {
         setBabaName(currentBabaName);
         setBabaLogoUrl(currentBabaLogoUrl);
         setGameTerm(currentGameTerm);
+        setPrimaryColor(currentPrimaryColor);
+        setSecondaryColor(currentSecondaryColor);
+        setAccentColor(currentAccentColor);
 
         setDbDueDate(currentDueDate);
         setDbMonthlyFee(currentMonthlyFee);
@@ -75,6 +90,10 @@ const ConfiguracoesTab = () => {
         setDbBabaName(currentBabaName);
         setDbBabaLogoUrl(currentBabaLogoUrl);
         setDbGameTerm(currentGameTerm);
+        setDbPrimaryColor(currentPrimaryColor);
+        setDbSecondaryColor(currentSecondaryColor);
+        setDbAccentColor(currentAccentColor);
+
       } catch (error: any) {
         showError(error.message || "Erro ao carregar configurações.");
       }
@@ -111,8 +130,8 @@ const ConfiguracoesTab = () => {
       dbSetter(value);
       showSuccess("Configuração atualizada com sucesso!");
 
-      if (key === 'baba_name') {
-        window.location.reload();
+      if (key === 'baba_name' || key.startsWith('theme_')) {
+        showSuccess("Recarregue a página para ver as alterações de tema e nome.");
       }
     } catch (error: any) {
       showError(error.message || "Erro ao salvar configuração.");
@@ -245,6 +264,41 @@ const ConfiguracoesTab = () => {
                     disabled={isUploadingLogo}
                   />
                   <p className="text-xs text-muted-foreground">PNG, JPG, WEBP até 5MB.</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Palette className="h-5 w-5" /> Personalização do Tema</CardTitle>
+            <CardDescription>Escolha as cores principais do seu grupo. As alterações serão aplicadas após recarregar a página.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="primary-color">Cor Primária</Label>
+                <div className="flex items-center gap-2">
+                  <Input id="primary-color" type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="p-1 h-10 w-14" />
+                  <Input type="text" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} />
+                  <Button size="sm" onClick={() => handleSettingSave('theme_primary_color', primaryColor, setDbPrimaryColor)} disabled={primaryColor === dbPrimaryColor}><SaveIcon className="h-4 w-4" /></Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="secondary-color">Cor Secundária</Label>
+                <div className="flex items-center gap-2">
+                  <Input id="secondary-color" type="color" value={secondaryColor} onChange={(e) => setSecondaryColor(e.target.value)} className="p-1 h-10 w-14" />
+                  <Input type="text" value={secondaryColor} onChange={(e) => setSecondaryColor(e.target.value)} />
+                  <Button size="sm" onClick={() => handleSettingSave('theme_secondary_color', secondaryColor, setDbSecondaryColor)} disabled={secondaryColor === dbSecondaryColor}><SaveIcon className="h-4 w-4" /></Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="accent-color">Cor de Destaque</Label>
+                <div className="flex items-center gap-2">
+                  <Input id="accent-color" type="color" value={accentColor} onChange={(e) => setAccentColor(e.target.value)} className="p-1 h-10 w-14" />
+                  <Input type="text" value={accentColor} onChange={(e) => setAccentColor(e.target.value)} />
+                  <Button size="sm" onClick={() => handleSettingSave('theme_accent_color', accentColor, setDbAccentColor)} disabled={accentColor === dbAccentColor}><SaveIcon className="h-4 w-4" /></Button>
                 </div>
               </div>
             </div>

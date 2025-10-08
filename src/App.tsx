@@ -35,7 +35,7 @@ const App = () => {
           attribute="class" 
           defaultTheme="system" 
           storageKey="vite-ui-theme"
-          themes={['light', 'dark', 'system', 'bbmp', 'leao']}
+          themes={['light', 'dark', 'system']}
         >
           <AuthProvider>
             <Toaster />

@@ -13,124 +13,65 @@
     --popover: 0 0% 100%; /* Branco */
     --popover-foreground: 222.2 84% 4.9%; /* Texto escuro */
  
-    --primary: 158 100% 19.6%; /* Verde (#006437) */
+    /* Cores dinâmicas com fallbacks */
+    --primary-h: var(--custom-primary-h, 158);
+    --primary-s: var(--custom-primary-s, 100%);
+    --primary-l: var(--custom-primary-l, 19.6%);
+    --primary: var(--primary-h) var(--primary-s) var(--primary-l);
     --primary-foreground: 0 0% 100%; /* Branco */
  
-    --secondary: 210 40% 96.1%; /* Cinza claro */
+    --secondary-h: var(--custom-secondary-h, 210);
+    --secondary-s: var(--custom-secondary-s, 40%);
+    --secondary-l: var(--custom-secondary-l, 96.1%);
+    --secondary: var(--secondary-h) var(--secondary-s) var(--secondary-l);
     --secondary-foreground: 222.2 47.4% 11.2%; /* Texto escuro */
  
+    --accent-h: var(--custom-accent-h, 158);
+    --accent-s: var(--custom-accent-s, 100%);
+    --accent-l: var(--custom-accent-l, 25%);
+    --accent: var(--accent-h) var(--accent-s) var(--accent-l);
+    --accent-foreground: 0 0% 100%; /* Branco */
+
     --muted: 210 40% 96.1%; /* Cinza claro */
     --muted-foreground: 215.4 16.3% 46.9%; /* Cinza médio */
  
-    --accent: 158 100% 25%; /* Um verde um pouco mais claro para destaque */
-    --accent-foreground: 0 0% 100%; /* Branco */
- 
-    --destructive: 0 84.2% 60.2%; /* Vermelho padrão para ações destrutivas */
+    --destructive: 0 84.2% 60.2%; /* Vermelho padrão */
     --destructive-foreground: 210 40% 98%; /* Branco */
 
     --border: 214.3 31.8% 91.4%; /* Cinza claro para bordas */
     --input: 214.3 31.8% 91.4%; /* Cinza claro para inputs */
-    --ring: 158 100% 19.6%; /* Anel com a cor primária */
+    --ring: var(--primary-h) var(--primary-s) var(--primary-l);
   }
  
   .dark {
-    --background: 158 20% 10%; /* Verde escuro de fundo */
-    --foreground: 210 40% 98%; /* Branco para texto */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
  
-    --card: 158 20% 12%; /* Verde escuro para cards */
-    --card-foreground: 210 40% 98%; /* Branco para texto de cards */
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
  
-    --popover: 158 20% 12%; /* Verde escuro para popovers */
-    --popover-foreground: 210 40% 98%; /* Branco para texto de popovers */
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
  
-    --primary: 158 100% 30%; /* Verde principal mais vibrante para contraste */
-    --primary-foreground: 0 0% 100%; /* Branco */
+    /* Cores dinâmicas para o tema escuro, ajustando a luminosidade */
+    --primary: var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.5);
+    --primary-foreground: 0 0% 100%;
  
-    --secondary: 217.2 32.6% 17.5%; /* Cinza escuro para secundário */
-    --secondary-foreground: 210 40% 98%; /* Branco */
+    --secondary: var(--secondary-h) var(--secondary-s) calc(var(--secondary-l) * 0.2);
+    --secondary-foreground: 210 40% 98%;
  
-    --muted: 217.2 32.6% 17.5%; /* Cinza escuro para muted */
-    --muted-foreground: 215 20.2% 65.1%; /* Cinza médio para muted foreground */
- 
-    --accent: 158 100% 40%; /* Verde mais claro para destaque */
-    --accent-foreground: 0 0% 100%; /* Branco */
- 
-    --destructive: 0 62.8% 30.6%; /* Vermelho escuro para destrutivo */
-    --destructive-foreground: 210 40% 98%; /* Branco */
- 
-    --border: 217.2 32.6% 17.5%; /* Cinza escuro para bordas */
-    --input: 217.2 32.6% 17.5%; /* Cinza escuro para inputs */
-    --ring: 158 100% 30%; /* Anel com a cor primária */
-
-    /* Mantendo as variáveis de sidebar se forem usadas, ajustando para o tema escuro */
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .bbmp { /* Bahia - Azul, Vermelho, Branco */
-    --background: 0 0% 100%; /* Branco */
-    --foreground: 222.2 84% 4.9%; /* Texto escuro */
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 236 90% 42%; /* Azul #0a14c8 */
-    --primary-foreground: 0 0% 100%; /* Branco */
-
-    --secondary: 3 90% 42%; /* Vermelho #c8140a */
-    --secondary-foreground: 0 0% 100%; /* Branco */
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 3 90% 42%; /* Vermelho #c8140a */
+    --accent: var(--accent-h) var(--accent-s) calc(var(--accent-l) * 1.2);
     --accent-foreground: 0 0% 100%;
-
-    --destructive: 3 90% 42%; /* Vermelho #c8140a */
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 236 90% 42%; /* Anel com cor primária (Azul) */
-  }
-
-  .leao { /* Vitória - Vermelho, Preto, Branco */
-    --background: 0 0% 0%; /* Black */
-    --foreground: 0 0% 100%; /* White */
-
-    --card: 0 0% 10%; /* Dark Gray */
-    --card-foreground: 0 0% 100%; /* White */
-
-    --popover: 0 0% 10%; /* Dark Gray */
-    --popover-foreground: 0 0% 100%; /* White */
-
-    --primary: 0 100% 50%; /* Red */
-    --primary-foreground: 0 0% 100%; /* White */
-
-    --secondary: 0 0% 15%; /* Darker Gray */
-    --secondary-foreground: 0 0% 100%; /* White */
-
-    --muted: 0 0% 15%; /* Darker Gray */
-    --muted-foreground: 0 0% 65%; /* Lighter Gray */
-
-    --accent: 0 100% 60%; /* Lighter Red */
-    --accent-foreground: 0 0% 100%; /* White */
-
-    --destructive: 0 100% 50%; /* Red */
-    --destructive-foreground: 0 0% 100%; /* White */
-
-    --border: 0 0% 15%; /* Darker Gray */
-    --input: 0 0% 15%; /* Darker Gray */
-    --ring: 0 100% 50%; /* Red */
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: var(--primary-h) var(--primary-s) calc(var(--primary-l) * 1.5);
   }
 }
 
