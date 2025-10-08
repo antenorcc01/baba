@@ -166,7 +166,7 @@ const ConfiguracoesTab = () => {
     setIsUploadingLogo(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const filePath = `public/${profile.baba_id}/logo-${Date.now()}.${fileExt}`;
+      const filePath = `${profile.baba_id}/logo-${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('logos')
@@ -180,6 +180,8 @@ const ConfiguracoesTab = () => {
 
       await handleSettingSave('baba_logo_url', publicUrl, setDbBabaLogoUrl);
       setBabaLogoUrl(publicUrl);
+      showSuccess("Logo atualizada! A página será recarregada para exibir a nova imagem.");
+      setTimeout(() => window.location.reload(), 1500);
     } catch (error: any) {
       showError(error.message || "Erro ao fazer upload da logo.");
     } finally {
