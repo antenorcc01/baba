@@ -20,14 +20,13 @@ const AdministerBaba = () => {
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerPhone, setRegisterPhone] = useState("");
-  const [registerPlayerType, setRegisterPlayerType] = useState("linha"); // Default to 'linha'
-  const [registerIsMensalista, setRegisterIsMensalista] = useState(true); // Default to true
+  const [registerPlayerType, setRegisterPlayerType] = useState("linha");
+  const [registerIsMensalista, setRegisterIsMensalista] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [currentBabaName, setCurrentBabaName] = useState<string | null>(null); // Para exibir o nome do baba existente
+  const [currentBabaName, setCurrentBabaName] = useState<string | null>(null);
   const { session, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirecionamento se o usuário JÁ ESTIVER logado e em um baba
   useEffect(() => {
     if (!authLoading && session && profile?.baba_id) {
       navigate('/dashboard', { replace: true });
@@ -36,19 +35,17 @@ const AdministerBaba = () => {
 
   useEffect(() => {
     const fetchCurrentBabaName = async () => {
+      // This logic might need adjustment if there are multiple tenants.
+      // For now, it fetches any available baba_name.
       const { data, error } = await supabase
         .from('group_settings')
         .select('setting_value')
         .eq('setting_key', 'baba_name')
+        .limit(1)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error("Error fetching baba name in AdministerBaba:", error);
-        setCurrentBabaName(null);
-      } else if (data) {
+      if (data) {
         setCurrentBabaName(data.setting_value);
-      } else {
-        setCurrentBabaName(null);
       }
     };
     fetchCurrentBabaName();
@@ -67,12 +64,8 @@ const AdministerBaba = () => {
   };
 
   const handleCreateBaba = async () => {
-    if (!babaName.trim()) {
-      showError("O nome do Baba é obrigatório.");
-      return;
-    }
-    if (!registerName.trim() || !registerEmail.trim() || !registerPassword.trim() || !registerPhone.trim()) {
-      showError("Todos os campos de cadastro do administrador são obrigatórios.");
+    if (!babaName.trim() || !registerName.trim() || !registerEmail.trim() || !registerPassword.trim() || !registerPhone.trim()) {
+      showError("Todos os campos são obrigatórios.");
       return;
     }
 
@@ -80,59 +73,36 @@ const AdministerBaba = () => {
     try {
       const phoneWithoutMask = registerPhone.replace(/\D/g, '');
 
-      // 1. Create the new user (who will be the admin)
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: registerEmail,
-        password: registerPassword,
-        options: {
-          data: {
+      // Call the new Edge Function to handle creation atomically
+      const { error: functionError } = await supabase.functions.invoke('create-baba-and-admin', {
+        body: {
+          babaName,
+          adminEmail: registerEmail,
+          adminPassword: registerPassword,
+          adminProfileData: {
             full_name: registerName,
             phone: phoneWithoutMask,
             player_type: registerPlayerType,
             is_mensalista: registerIsMensalista,
-            role: 'admin', // Definir a role como admin aqui
-          }
-        }
-      });
-
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("Usuário não criado após o cadastro.");
-
-      const newAdminUserId = authData.user.id;
-
-      // 2. Create the new tenant (Baba)
-      const { data: tenantData, error: tenantError } = await supabase
-        .from('tenants')
-        .insert({ name: babaName, admin_user_id: newAdminUserId })
-        .select('id')
-        .single();
-
-      if (tenantError) throw tenantError;
-
-      const newBabaId = tenantData.id;
-
-      // 3. Update the new user's profile to be admin of this new tenant
-      const { error: profileUpdateError } = await supabase
-        .from('profiles')
-        .update({ baba_id: newBabaId }) // A role já foi definida na criação
-        .eq('id', newAdminUserId);
-
-      if (profileUpdateError) throw profileUpdateError;
-
-      // 4. Save the baba name in group_settings for the new tenant using Edge Function
-      const { error: settingsInvokeError } = await supabase.functions.invoke('create-group-setting', {
-        body: {
-          baba_id: newBabaId,
-          setting_key: 'baba_name',
-          setting_value: babaName,
+          },
         },
       });
-      
-      if (settingsInvokeError) console.error("Error invoking create-group-setting Edge Function:", settingsInvokeError);
 
+      if (functionError) throw new Error(functionError.message);
+
+      // After successful creation, sign the new user in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: registerEmail,
+        password: registerPassword,
+      });
+
+      if (signInError) throw signInError;
 
       showSuccess(`Baba "${babaName}" criado com sucesso! Você é o administrador.`);
-      navigate('/dashboard', { replace: true }); // Redireciona para o dashboard
+      // The AuthProvider will detect the new session and redirect to the dashboard.
+      // Forcing a reload can sometimes help ensure all context is fresh.
+      window.location.href = '/dashboard';
+
     } catch (error: any) {
       console.error("Erro ao criar Baba:", error);
       showError(error.message || "Erro ao criar o Baba.");
@@ -141,13 +111,6 @@ const AdministerBaba = () => {
     }
   };
 
-  // Se o usuário já está logado e não tem baba_id, ele deve ir para JoinBaba
-  if (!authLoading && session && !profile?.baba_id) {
-    navigate('/join-baba', { replace: true });
-    return null;
-  }
-
-  // Mostrar loading enquanto verifica autenticação ou se já está em um baba
   if (authLoading || (session && profile?.baba_id)) {
     return (
       <div className="flex-grow flex items-center justify-center">
