@@ -111,7 +111,7 @@ export default function Header() {
   }, [showNavAndProfile, profile?.baba_id]);
 
   useEffect(() => {
-    document.title = babaName ? `${babaName} - Baba App` : 'Baba App';
+    document.title = babaName ? `${babaName} - Futebol dos Amigos` : 'Futebol dos Amigos';
   }, [babaName]);
 
   const handleSignOut = async () => {
@@ -161,7 +161,7 @@ export default function Header() {
       <div className="container mx-auto px-4 h-28 flex items-center justify-between">
         <Link to={session && profile?.baba_id ? "/dashboard" : "/"} className="flex items-center gap-2">
           <img src={babaLogoUrl} alt="Logo" className="h-24 w-24 object-contain" />
-          <span className="text-2xl font-bold text-primary-foreground">{babaName || "Baba dos Baianos"}</span>
+          <span className="text-2xl font-bold text-primary-foreground">{babaName || "Futebol dos Amigos"}</span>
         </Link>
 
         {showNavAndProfile && (
@@ -216,7 +216,7 @@ export default function Header() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <div className="py-1 text-center text-xs text-muted-foreground">
-                        v1.00
+                        v1.0.0
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -232,7 +232,7 @@ export default function Header() {
                     <div className="mb-6">
                       <Link to="/" className="flex items-center gap-2">
                         <img src={babaLogoUrl} alt="Logo" className="h-8 w-8 object-contain" />
-                        <span className="text-lg font-bold">{babaName || "Baba dos Baianos"}</span>
+                        <span className="text-lg font-bold">{babaName || "Futebol dos Amigos"}</span>
                       </Link>
                     </div>
                     <nav className="flex flex-col gap-2">
@@ -272,7 +272,7 @@ export default function Header() {
                         </SheetClose>
                       </div>
                       <div className="pt-4 text-center text-xs text-muted-foreground">
-                        v1.00
+                        v1.0.0
                       </div>
                     </div>
                   </SheetContent>

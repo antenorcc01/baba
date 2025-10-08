@@ -1,20 +1,19 @@
 "use client";
 
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { HomeIcon, UsersIcon, ShieldCheckIcon, PlusCircleIcon, LogInIcon, ArrowRight } from "lucide-react";
 import { MadeWithDyad } from "@/components/made-with-dyad";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { PlusCircleIcon, LogInIcon, ArrowRight } from "lucide-react";
+
+const animatedWords = ["Futebol", "Pelada", "Racha", "Rachão", "Baba"];
 
 const Welcome = () => {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
-  const [babaName, setBabaName] = useState<string | null>(null);
+  const [wordIndex, setWordIndex] = useState(0);
 
   useEffect(() => {
     if (!loading && session) {
@@ -23,23 +22,11 @@ const Welcome = () => {
   }, [session, loading, navigate]);
 
   useEffect(() => {
-    const fetchBabaName = async () => {
-      const { data, error } = await supabase
-        .from('group_settings')
-        .select('setting_value')
-        .eq('setting_key', 'baba_name')
-        .single();
+    const interval = setInterval(() => {
+      setWordIndex((prevIndex) => (prevIndex + 1) % animatedWords.length);
+    }, 2000); // Troca a palavra a cada 2 segundos
 
-      if (error && error.code !== 'PGRST116') {
-        console.error("Error fetching baba name in Welcome:", error);
-        setBabaName(null);
-      } else if (data) {
-        setBabaName(data.setting_value);
-      } else {
-        setBabaName(null);
-      }
-    };
-    fetchBabaName();
+    return () => clearInterval(interval); // Limpa o intervalo ao desmontar o componente
   }, []);
 
   if (loading) {
@@ -55,7 +42,7 @@ const Welcome = () => {
       <main className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center justify-center text-center">
         <div className="mb-10">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Bem-vindo ao {babaName || "Baba dos Baianos"}!
+            Bem-vindo ao <span className="inline-block text-primary w-48 text-left">{animatedWords[wordIndex]}</span> dos Amigos!
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             Organize seus jogos de futebol com facilidade, gerencie jogadores, sorteie times e controle pagamentos. Tudo em um só lugar!
